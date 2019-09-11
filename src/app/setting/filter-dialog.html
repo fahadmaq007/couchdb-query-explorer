@@ -1,0 +1,31 @@
+<mat-dialog-content>
+  <div class="mat-dialog-header">
+      <h1 mat-dialog-title>Filter</h1>
+  </div>
+  
+  <mat-form-field>
+    <input matInput placeholder="Field" [(ngModel)]="filter.field">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Operation</mat-label>
+    <mat-select [(value)]="filter.operation">
+      <mat-option *ngFor="let operation of objectKeys(metadata.operations)" [value]="operation">
+        {{metadata.operations[operation]}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field>
+    <input matInput placeholder="Value" [(ngModel)]="filter.value">
+  </mat-form-field>
+
+  <mat-form-field>
+    <input matInput placeholder="Name (Optional)" [(ngModel)]="filter.name">
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Save</button>
+</mat-dialog-actions>

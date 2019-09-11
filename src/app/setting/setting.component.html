@@ -1,0 +1,106 @@
+<div class="margin">
+    <div class="row">
+        <div class="col">
+          <h2>Settings</h2>
+        </div>
+
+        <div class="col">
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Import Settings" matTooltip="Key in JSON format and hit Enter" [(ngModel)]="importSettingText" (keyup.enter)="import()">
+            <button mat-button *ngIf="importSettingText" matSuffix mat-icon-button aria-label="Clear" (click)="metadata.couchUrl=undefined">
+              <i class="fas fa-times"></i>
+            </button>
+          </mat-form-field>
+        </div>
+    </div>    
+
+    <mat-card class="fields-card">
+        <mat-card-header>
+          <mat-card-title>CouchDB Configuration</mat-card-title>
+          <mat-card-subtitle></mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="row">
+            <div class="col col-md-4 col-sm-6">
+              <mat-form-field class="full-width">
+                <input matInput placeholder="CouchDB URL (http://localhost:5984)" [(ngModel)]="metadata.couchUrl" (keyup.enter)="saveSettings()">
+                <button mat-button *ngIf="metadata.couchUrl" matSuffix mat-icon-button aria-label="Clear" (click)="metadata.couchUrl=undefined">
+                  <i class="fas fa-times"></i>
+                </button>
+              </mat-form-field>
+            </div>
+          </div> 
+          
+        </mat-card-content>
+      </mat-card>
+    
+      <div class="margin"></div>
+
+  <mat-card class="fields-card">
+    <mat-card-header>
+      <mat-card-title>Fields</mat-card-title>
+      <mat-card-subtitle>These fields will be shown in the <a routerLink="">query table</a></mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <span class="filter-component" *ngFor="let field of metadata.fields; index as i;">
+          <mat-form-field *ngIf="selectedField == field">
+            <input matInput type="text" placeholder="Field" [(ngModel)]="selectedField" (keyup.enter)="metadata.fields[i] = selectedField; selectedField =undefined">
+          </mat-form-field>
+          <a routerLink="." *ngIf="selectedField != field" (click)="selectedField = field">
+            <span>{{field}}</span>
+          </a>
+      </span>
+        
+      <mat-form-field class="field">
+        <input matInput type="text" placeholder="New field" [(ngModel)]="newField" (keyup.enter)="addNewField()">
+        <button mat-button *ngIf="newField" matSuffix mat-icon-button aria-label="Clear" (click)="newField=''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+      <a routerLink="." class="field" (click)="addNewField()">
+          + Add Field
+      </a>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="margin"></div>
+
+  <mat-card class="fields-card">
+    <mat-card-header>
+      <mat-card-title>Filters</mat-card-title>
+      <mat-card-subtitle>
+        These filters will be used in the <a routerLink="">query executor</a>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <span *ngFor="let filter of metadata.filters" class="filter-component">
+        <a routerLink="." (click)="openFilterDialog(filter)" class="">
+          <span *ngIf="filter.name">{{filter.name}}</span>
+          <span *ngIf="! filter.name">{{filter.field | uppercase }} {{metadata.operations[filter.operation]}} {{filter.value}}</span>
+        </a>
+      </span>
+
+      <span class="field">
+        <a routerLink="." (click)="addNewFilter()">
+          + Add Filter
+        </a>
+      </span>
+    </mat-card-content>
+    <!-- <mat-card-actions>
+      <button mat-button>LIKE</button>
+      <button mat-button>SHARE</button>
+    </mat-card-actions> -->
+  </mat-card>
+
+  <div class="margin"></div>
+
+  <div class="row">
+      <div class="col">
+        <div class="right">
+          <button mat-stroked-button aria-label="Export Settings" (click)="export()">
+            Export Settings
+          </button>
+        </div>
+      </div>
+  </div>    
+</div>

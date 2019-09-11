@@ -1,0 +1,13 @@
+{
+    "couchUrl": "http://localhost:5984",
+    "fields": [ "_id", "type", "channel", "parentId" ],
+    "filters": [ {
+        "field": "type", "operation": "$eq", "value": ""
+    }],
+    "operations": {
+        "$eq": "is",
+        "$regex": "contains",
+        "$gt": "greater than",
+        "$lt": "less than"
+    }
+}

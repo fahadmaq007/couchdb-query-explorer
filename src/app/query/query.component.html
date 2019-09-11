@@ -1,0 +1,137 @@
+<div class="margin">
+
+  <div class="row">
+    <div class="col">
+      <mat-form-field class="full-width">
+        <mat-label>Database: </mat-label>
+        <mat-select matNativeControl [(value)]="selectedDb" (change)="onDbChange()" color="accent">
+          <mat-option *ngFor="let db of dbs" [value]="db">
+            {{db}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <span *ngIf="selectedDb">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Key in document _id & hit Enter" [(ngModel)]="_idFilter.value" (keyup.enter)="openDocumentById()">
+          <button mat-button *ngIf="_idFilter.value" matSuffix mat-icon-button aria-label="Clear" (click)="_idFilter.value=undefined">
+            <i class="fas fa-times"></i>
+          </button>
+        </mat-form-field>
+      </span>
+    </div>
+  </div>
+  <mat-card class="fields-card">
+    <!-- <mat-card-header>
+      <mat-card-title>Fields</mat-card-title>
+      <mat-card-subtitle>These fields will be shown in the <a routerLink="">query table</a></mat-card-subtitle>
+    </mat-card-header> -->
+    <mat-card-content>
+      <div class="row">
+        <div class="col">
+          <span *ngFor="let filter of metadata.filters" class="filter-component">
+            <mat-checkbox [checked]="selectedFilters.indexOf(filter) > -1" (change)="onFilterSelect(filter)">
+            </mat-checkbox>
+            <a routerLink="." (click)="filter.$$edit=true">
+              <span *ngIf="filter.name" matTooltip="{{filter.field }} {{metadata.operations[filter.operation]}} '{{filter.value}}', click to edit.">{{filter.name}}</span>
+              <span *ngIf="! filter.name">{{filter.field }} {{metadata.operations[filter.operation]}}
+                '{{filter.value}}'</span>
+            </a>
+            <span *ngIf="filter.$$edit" class="margin-l10">
+              <mat-form-field>
+                <input matInput placeholder="Value" matTooltip="Key in & hit Enter" [(ngModel)]="filter.value" (keyup.enter)="onFilterSelect(filter)">
+                <button mat-button *ngIf="filter.value" matSuffix mat-icon-button aria-label="Clear" (click)="filter.value=undefined">
+                  <i class="fas fa-times"></i>
+                </button>
+              </mat-form-field>
+            </span>
+          </span>
+          
+            <a routerLink="." class="field margin-r10" (click)="clearFilterSelection()" *ngIf="selectedFilters.length">
+              Clear Selection
+            </a>
+
+            <a routerLink="." class="field margin-r10" (click)="copySelectors()" *ngIf="selectedFilters.length" matTooltip="Copy the query as JSON text">
+              Copy Query
+            </a>
+            <!-- <button mat-flat-button color="primary" (click)="executeQuery()">Search</button> -->
+        </div>
+      </div>
+      <!-- <div class="margin"></div>
+      <div class="row">
+        <div class="col">
+          <div class=" right">
+            <button mat-stroked-button (click)="clearFilterSelection()">Clear Selection</button>
+
+            <button mat-stroked-button (click)="executeQuery()">Copy Selector</button>
+
+            <button mat-flat-button color="primary" (click)="executeQuery()">Search</button>
+          </div>
+        </div>
+      </div> -->
+    </mat-card-content>
+  </mat-card>
+
+  <div class="row margin-t10">
+    <div class="col">
+      <mat-form-field *ngIf="dataSource.data && dataSource.data.length" matTooltip="Concatenates UNIQUE column values from selected rows (Considers all if none selected)"
+        matTooltipPosition='right'>
+        <mat-label>Concatenate Column Values: </mat-label>
+        <mat-select [(value)]="concatenateField" (change)="concatenate(concatenateField); concatenateField=undefined"
+          color="accent">
+          <mat-option *ngFor="let field of metadata.fields" [value]="field">
+            {{field}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <!-- <mat-paginator #paginator [length]="pageLength" [pageSizeOptions]="[10, 20, 50]" (page)="onPageEvent($event)" ></mat-paginator> -->
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col mat-elevation-z8">
+      
+      <mat-table #table [dataSource]="dataSource" class="mat-elevation-z8">
+
+        <ng-container matColumnDef="select">
+          <mat-header-cell *matHeaderCellDef ngClass="select">
+            <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+            </mat-checkbox>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row" ngClass="select">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+              [aria-label]="checkboxLabel(row)">
+            </mat-checkbox>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="{{column}}" *ngFor="let column of metadata.fields">
+          <mat-header-cell *matHeaderCellDef [ngClass]="column"> <span><b>{{ column }}</b></span> </mat-header-cell>
+          <mat-cell *matCellDef="let element" [ngClass]="column">
+            <span *ngIf="column == '_id'" matTooltip="Open Document '{{element[column]}}'" matTooltipPosition='after'>
+              <a href="{{dbClientUrl}}/{{element[column]}}" target="_blank">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+            </span>
+            <a class="copy" *ngIf="column != '_id' && element[column]" ngxClipboard [cbContent]="element[column]"
+              matTooltip="Copy text" (click)="showMessage('Copied Text')">{{element[column]}} </a>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></mat-row>
+      </mat-table>
+
+      <mat-card *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center">
+        <mat-progress-spinner diameter="50" color="primary" mode="indeterminate">
+        </mat-progress-spinner>
+      </mat-card>
+
+    </div>
+  </div>
+
+</div>

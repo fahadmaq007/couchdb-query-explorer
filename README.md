@@ -20,6 +20,18 @@ Step 2: Launch http://localhost:8855/couchdb-query-explorer/query
 
 How to use the app?
 ******************
-It's relatively a simple & an intuitive tool to query the CouchDB Database. It uses the browser's localStorage to store the metadata user creates & hence you don't need to re-create it again & again.
+It's relatively a simple & an intuitive tool to query the CouchDB. 
 
+Features:
+********
 
+1. Settings: The launch of the application is 'Query Explorer' and if you are setting up the application for the first time, go to Settings page by clicking 'Settings' icon on the top right corner and provide details like CouchDB. (For eg. URL). You can also create common fields and the filters you generally deal with. 
+
+   a. Field: It's a free text input, key in the attribute name & Click on <i>Add Field</i>.
+   
+   b. Filter: Click on <i>Add Filter</i> & provide details like the field (attributeName), operation (eq, regex, gte, lte), value and optional name to it.
+   
+The setting configuration data is stored in browser's localStorage so you don't have to re-create them.
+
+2. Query Explorer: It is as simple as selecting the available filters to query the database. However, if you want change the value of the filter, click on it.
+Note: The filter value that is changed here will be temporary and will not be persisted.

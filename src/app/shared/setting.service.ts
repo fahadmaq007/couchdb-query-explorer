@@ -26,16 +26,11 @@ export class SettingService {
 
     public load(): any {
         const str = localStorage.getItem("metadata");
-        console.log("load str", str);
         var metadata = undefined;
         if (str !== undefined) {
             metadata = JSON.parse(str);
             this.metadata = metadata;
         }
-        // if (! metadata.couchUrl) {
-        //     metadata.couchUrl = "http://localhost:5984";
-        // }
-        
         return this.metadata;
     }
 

@@ -6,8 +6,8 @@
 
         <div class="col">
           <mat-form-field class="full-width">
-            <input matInput placeholder="Import Settings" matTooltip="Key in JSON format and hit Enter" [(ngModel)]="importSettingText" (keyup.enter)="import()">
-            <button mat-button *ngIf="importSettingText" matSuffix mat-icon-button aria-label="Clear" (click)="metadata.couchUrl=undefined">
+            <input matInput placeholder="Import Settings (Key in JSON format and hit Enter)" matTooltip="Key in JSON format and hit Enter" [(ngModel)]="importSettingText" (keyup.enter)="import()">
+            <button mat-button *ngIf="importSettingText" matSuffix mat-icon-button aria-label="Clear" (click)="importSettingText=undefined">
               <i class="fas fa-times"></i>
             </button>
           </mat-form-field>
@@ -23,7 +23,7 @@
           <div class="row">
             <div class="col col-md-4 col-sm-6">
               <mat-form-field class="full-width">
-                <input matInput placeholder="CouchDB URL (http://localhost:5984)" [(ngModel)]="metadata.couchUrl" (keyup.enter)="saveSettings()">
+                <input matInput placeholder="CouchDB URL (Key in CouchDB url & hit Enter)" matTooltip="Eg. http://localhost:5984" [(ngModel)]="metadata.couchUrl" (keyup.enter)="saveSettings()">
                 <button mat-button *ngIf="metadata.couchUrl" matSuffix mat-icon-button aria-label="Clear" (click)="metadata.couchUrl=undefined">
                   <i class="fas fa-times"></i>
                 </button>

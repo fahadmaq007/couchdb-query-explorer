@@ -15,21 +15,7 @@ export class HeaderComponent {
 
   constructor(@Inject('state') private state, @Inject(APP_CONFIG) appConfig) {
     this.appConfig = appConfig;
-    this.loadTitle();
     this.loadMenus();
-    this.loadStoredMetadata();
-  }
-
-  private loadStoredMetadata(): void {
-    this.metadata = localStorage.getItem("metadata");
-    console.log("meta", this.metadata);
-  }
-  private loadTitle(): void {
-    console.log('state', this.state);
-    //this.stateService.getCurrentState();
-    // this.state.title.subscribe((res: string) => {
-    //   this.title = res;
-    // });
   }
 
   changeLanguage(language: string): void {

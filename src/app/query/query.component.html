@@ -14,7 +14,7 @@
     <div class="col">
       <span *ngIf="selectedDb">
         <mat-form-field class="full-width">
-          <input matInput placeholder="Key in document _id & hit Enter" [(ngModel)]="_idFilter.value" (keyup.enter)="openDocumentById()">
+          <input matInput placeholder="Key in document _id & hit Enter" [(ngModel)]="_idFilter.value" (keyup.enter)="showDocumentById()">
           <button mat-button *ngIf="_idFilter.value" matSuffix mat-icon-button aria-label="Clear" (click)="_idFilter.value=undefined">
             <i class="fas fa-times"></i>
           </button>
@@ -31,7 +31,7 @@
       <div class="row">
         <div class="col">
           <span *ngFor="let filter of metadata.filters" class="filter-component">
-            <mat-checkbox [checked]="selectedFilters.indexOf(filter) > -1" (change)="onFilterSelect(filter)">
+            <mat-checkbox [checked]="selectedFilters.indexOf(filter) > -1" [(ngModel)]="filter.selected" (change)="onFilterChanged(filter)">
             </mat-checkbox>
             <a routerLink="." (click)="filter.$$edit=true">
               <span *ngIf="filter.name" matTooltip="{{filter.field }} {{metadata.operations[filter.operation]}} '{{filter.value}}', click to edit.">{{filter.name}}</span>
@@ -40,7 +40,7 @@
             </a>
             <span *ngIf="filter.$$edit" class="margin-l10">
               <mat-form-field>
-                <input matInput placeholder="Value" matTooltip="Key in & hit Enter" [(ngModel)]="filter.value" (keyup.enter)="onFilterSelect(filter)">
+                <input matInput placeholder="Value" matTooltip="Key in & hit Enter" [(ngModel)]="filter.value" (keyup.enter)="filter.selected = true; onFilterChanged(filter)">
                 <button mat-button *ngIf="filter.value" matSuffix mat-icon-button aria-label="Clear" (click)="filter.value=undefined">
                   <i class="fas fa-times"></i>
                 </button>
@@ -112,7 +112,8 @@
         <ng-container matColumnDef="{{column}}" *ngFor="let column of metadata.fields">
           <mat-header-cell *matHeaderCellDef [ngClass]="column"> <span><b>{{ column }}</b></span> </mat-header-cell>
           <mat-cell *matCellDef="let element" [ngClass]="column">
-            <span *ngIf="column == '_id'" matTooltip="Open Document '{{element[column]}}'" matTooltipPosition='after'>
+            <span *ngIf="column == '_id'" matTooltip="Open Document '{{element[column]}}'" matTooltipPosition='after' ngxClipboard [cbContent]="element[column]"
+            (click)="showMessage('Copied _id')">
               <a href="{{dbClientUrl}}/{{element[column]}}" target="_blank">
                 <i class="fas fa-external-link-alt"></i>
               </a>

@@ -32,7 +32,7 @@ export class QueryComponent implements OnInit {
 
   constructor(private queryService: QueryService, private snackBar: MatSnackBar,
      private settingService: SettingService , private clipboardService: ClipboardService) { 
-       
+      
      }
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -43,10 +43,10 @@ export class QueryComponent implements OnInit {
    */
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
-    this.loadSettings();
   }
   
   ngOnInit() {
+    this.loadSettings();
   }
 
   /** Whether the number of selected elements matches the total number of rows. */
@@ -144,14 +144,18 @@ export class QueryComponent implements OnInit {
       duration: 2000,
     });
   }
-  onFilterSelect(filter): void {
+  onFilterChanged(filter): void {
     delete filter.$$edit; 
-    console.log("onFilterSelect", filter, this.dataSource);
+    console.log("onFilterChanged", filter);
     var index = this.selectedFilters.indexOf(filter);
-    if (index > -1) {
-      this.selectedFilters.splice(index, 1);
+    if (filter.selected) {
+      if (index == -1) {
+        this.selectedFilters.push(filter);
+      } 
     } else {
-      this.selectedFilters.push(filter);
+      if (index > -1) {
+        this.selectedFilters.splice(index, 1);
+      }
     }
     this.executeQuery(); 
   }
@@ -160,7 +164,13 @@ export class QueryComponent implements OnInit {
     this.selectedFilters = [];
   }
 
-  openDocumentById(): void {
+  copyDocumentId(): void {
+    this.selectedFilters = [];
+    this.selectedFilters.push(this._idFilter);
+    this.executeQuery();
+  }
+
+  showDocumentById(): void {
     this.selectedFilters = [];
     this.selectedFilters.push(this._idFilter);
     this.executeQuery();

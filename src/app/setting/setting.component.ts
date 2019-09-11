@@ -50,7 +50,7 @@ export class SettingComponent implements OnInit {
       if (fields) {
         fields.push(this.newField);
         this.newField = '';
-        this.settingService.store(this.metadata);
+        this.saveSettings();
       }
     }
   }
@@ -70,7 +70,7 @@ export class SettingComponent implements OnInit {
         if (index == -1) {
           this.metadata.filters.push(result.filter);
         } 
-        this.settingService.store(this.metadata);
+        this.saveSettings();
       }
     });
   }
@@ -82,6 +82,7 @@ export class SettingComponent implements OnInit {
 
    saveSettings() : void {
     this.settingService.store(this.metadata);
+    this.showMessage("Settings Stored.");
   }
 
   private showMessage(msg): void {

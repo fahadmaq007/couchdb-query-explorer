@@ -31,7 +31,13 @@ Features:
    
    b. Filter: Click on <i>Add Filter</i> & provide details like the field (attributeName), operation (eq, regex, gte, lte), value and optional name to it.
    
+   c. Import Settings: Paste the JSON format of the settings metadata & hit Enter. For eg. ``` {"couchUrl":"http://localhost:5984","fields":["_id","type","channel","parentId"],"filters":[{"field":"type","operation":"$eq","value":""}],"operations":{"$eq":"is","$regex":"contains","$gt":"greater than","$lt":"less than"}}```
+   
+   d. Export Settings: As name suggests, the action will copy the settings metadata.
+   
+   
 The setting configuration data is stored in browser's localStorage so you don't have to re-create them.
 
 2. Query Explorer: It is as simple as selecting the available filters to query the database. However, if you want change the value of the filter, click on it.
+
 Note: The filter value that is changed here will be temporary and will not be persisted.

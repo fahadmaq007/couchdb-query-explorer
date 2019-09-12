@@ -174,6 +174,7 @@ export class QueryComponent implements OnInit {
     this.selectedFilters = [];
     this.selectedFilters.push(this._idFilter);
     this.executeQuery();
+    this.selectedFilters = [];
   }
 
   copySelectors(): void {
@@ -192,10 +193,7 @@ export class QueryComponent implements OnInit {
     var data = this.dataSource.data;
     if (numSelected > 0) {
       data = this.selection.selected;
-
     }
-
-    console.log(data);
     var ids = "";
     if (! field) {
       field = "_id";
@@ -214,6 +212,29 @@ export class QueryComponent implements OnInit {
     }
   }
 
+  copyDocuments(): void {
+    const numSelected = this.selection.selected.length;
+    var data = this.dataSource.data;
+    if (numSelected > 0) {
+      data = this.selection.selected;
+    }
+
+    var text = "";
+    if (data) {
+      if (data.length == 1) {
+        text = JSON.stringify(data[0]);
+      } else {
+        for (var i = 0; i < data.length; i++) {
+          var each = data[i];
+          var value = JSON.stringify(data[i]);
+          text += value + ", ";
+        }
+        text = "[" + text.substring(0, text.lastIndexOf(",")) + "]";
+      }
+      this.clipboardService.copyFromContent(text);
+      this.showMessage("Copied Document(s)");
+    }
+  }
   onPageEvent(event): void {
     console.log(event);
     this.pageEvent = event;

@@ -85,8 +85,13 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
+
     </div>
     <div class="col">
+      <div class="right">
+        <a *ngIf="dataSource.data && dataSource.data.length" 
+        mat-stroked-button (click)="copyDocuments()">Copy Document(s)</a>
+      </div>
       <!-- <mat-paginator #paginator [length]="pageLength" [pageSizeOptions]="[10, 20, 50]" (page)="onPageEvent($event)" ></mat-paginator> -->
     </div>
   </div>

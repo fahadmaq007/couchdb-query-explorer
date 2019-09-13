@@ -42,7 +42,7 @@
       <mat-card-subtitle>These fields will be shown in the <a routerLink="">query table</a></mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-      <span class="filter-component" *ngFor="let field of metadata.fields; index as i;">
+      <span class="component-group" *ngFor="let field of metadata.fields; index as i;">
           <mat-form-field *ngIf="selectedField == field">
             <input matInput type="text" placeholder="Field" [(ngModel)]="selectedField" (keyup.enter)="metadata.fields[i] = selectedField; selectedField =undefined">
           </mat-form-field>
@@ -73,7 +73,7 @@
       </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-      <span *ngFor="let filter of metadata.filters" class="filter-component">
+      <span *ngFor="let filter of metadata.filters" class="component-group">
         <a routerLink="." (click)="openFilterDialog(filter)" class="">
           <span *ngIf="filter.name">{{filter.name}}</span>
           <span *ngIf="! filter.name">{{filter.field | uppercase }} {{metadata.operations[filter.operation]}} {{filter.value}}</span>
@@ -97,7 +97,7 @@
   <div class="row">
       <div class="col">
         <div class="right">
-          <button mat-stroked-button aria-label="Export Settings" (click)="export()">
+          <button mat-raised-button color="primary" aria-label="Export Settings" (click)="export()">
             Export Settings
           </button>
         </div>

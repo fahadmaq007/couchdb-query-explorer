@@ -1,3 +1,10 @@
+$green: rgba(2, 184, 117, 1);
+$anchor-color: #007bff;
+$primary: #563d7c;
+$primary-hover: #352053;
+$text-color: #6c757d;
+$header-text-color: #cbbde2;
+$accent: #ffe484;
 // IMPORTS
 
 // - VENDORS
@@ -19,20 +26,33 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "~@fortawesome/fontawesome-free/scss/solid";
 @import "~@fortawesome/fontawesome-free/scss/brands";
 
+.mat-raised-button.mat-primary {
+  background-color: $primary;
+}
+.mat-raised-button.mat-primary:hover {
+  background-color:  $accent;
+  border-color: $accent; 
+  color: $primary;
+}
 * {
   font-family: 'Roboto', sans-serif;
 }
-
-$green: rgba(2, 184, 117, 1);
-$anchor-color: #007bff;
-$primary: #3f51b5;
-
+body {
+  overflow-y: auto;
+}
 .fontsize18 {
   font-size: 18px;
 }
 
 a, .cp {
   cursor: pointer;
+  color: $text-color;
+}
+a:hover {
+  color: $primary;
+}
+.header {
+  background: $primary !important;
 }
 
 .section-title {
@@ -54,64 +74,31 @@ a, .cp {
 snack-bar-container {
   background: $primary !important;
 }
-
-.mat-menu-content {
-  background:$primary;
+.mat-table {
+  overflow: auto;
+  max-height: 450px;
 }
-
-.mat-menu-item, .mat-menu-item .mat-icon {
-  color: white;
-  font-weight: 100;
+.mat-column-select {
+  overflow: initial;
 }
-
 .mat-cell, .mat-header-cell {
   white-space: nowrap;
   text-overflow: ellipsis;
   margin-right: 5px;
-}
-.sl-actions {
-  align-items: center;
-  display: flex;
-  padding-bottom: 1em;
-}
-
-.like-icon {
-  color: #DC143C;
-  cursor: pointer;
 }
 
 .mat-raised-button[disabled] {
   background: #bbb !important;
 }
 
-// .mat-dialog-container {
-//   background: #3f51b5;
-//   color: white;
-// }
-
-// .mat-dialog-content {
-//   text-align: center;
-//   padding: 1em 24px !important;
-// }
 .mat-dialog-header {
   margin: 0px -24px;
-  // background-color: $primary;
-  // color: white;
 }
 .mat-dialog-title {
   text-align: center;
 }
 .mat-dialog-container {
   padding: 0px 20px 20px 20px;
-}
-.mat-card-image {
-  margin-bottom: -28px !important;
-  border-top: 1px solid #eee;
-}
-
-.mat-list-avatar {
-  height: 55px !important;
-  width: 55px !important;
 }
 
 .text-center {
@@ -120,24 +107,6 @@ snack-bar-container {
 
 .text-right {
   text-align: right;
-}
-
-pre {
-  background: #f4f4f4;
-  border: 1px solid #ddd;
-  border-left: 3px solid #3f51b5;
-  color: #666;
-  page-break-inside: avoid;
-  font-family: monospace;
-  font-size: 15px;
-  line-height: 1.6;
-  margin-bottom: 1.6em;
-  max-width: 100%;
-  overflow: auto;
-  padding: 1em 1.5em;
-  display: block;
-  text-align: left;
-  word-wrap: break-word;
 }
 
 .right {
@@ -153,18 +122,6 @@ pre {
 .margin {
   margin: 8px 16px;
 }
-.margin-r10 {
-  margin-right: 10px;
-}
-.margin-l10 {
-  margin-left: 10px;
-}
-.margin-t10 {
-  margin-top: 10px;
-}
-.row {
-  margin-bottom: 5px;
-}
 .round-border {
   border-radius: 3px;
 }
@@ -174,18 +131,10 @@ pre {
   width: 15px !important;
   top: 3px;
 }
-
-.delete-icon {
-  padding: 3px;
-  margin-left: 5px; 
-  height: 15px !important;
-  width: 15px !important;
-  top: 3px;
-  text-align: center;
-  font-weight: bold;
-}
-.delete-icon:hover {
-  
+.flex-end {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
 }
 .field {
   font-size: 11px;
@@ -194,17 +143,24 @@ pre {
   justify-items: center;
   align-items: center;
 }
-.filter-component {
-  max-width: 180px;
-  border: 1px solid $green;
+.component-group {
+  border: 1px solid $primary;
   border-radius: 2px;
   font-size: 12px;
-  padding: 10px 5px;
-  margin-right: 5px;
+  padding: 5px;
+  margin-right: 3px;
+  margin-bottom: 3px;
+  display: inline-block;
 }
-
+.filter-wrapper {
+  width: 100%;
+}
+.filter-wrapper input {
+  border: 0px;
+  border-bottom: 1px solid #666; 
+}
 .filter-component > a {
-color: $green;
+  color: $text-color;
 }
 
 .fields {
@@ -238,9 +194,12 @@ flex: 0 0 100px !important;
   margin: 1px !important;
 }
 .copy:hover {
-  color: $anchor-color !important;
+  color: $primary !important;
 }
 .full-width {
   min-width: 150px;
   width:100%;
+}
+.content-card {
+  padding: 0px !important;
 }

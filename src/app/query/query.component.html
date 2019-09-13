@@ -1,7 +1,7 @@
 <div class="margin">
 
   <div class="row">
-    <div class="col">
+    <div class="col col-md-6 col-sm-12 col-12">
       <mat-form-field class="full-width">
         <mat-label>Database: </mat-label>
         <mat-select matNativeControl [(value)]="selectedDb" (change)="onDbChange()" color="accent">
@@ -11,7 +11,7 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="col">
+    <div class="col col-md-6 col-sm-12 col-12">
       <span *ngIf="selectedDb">
         <mat-form-field class="full-width">
           <input matInput placeholder="Key in document _id & hit Enter" [(ngModel)]="_idFilter.value" (keyup.enter)="showDocumentById()">
@@ -24,7 +24,7 @@
   </div>
   
   <div class="row">
-    <div class="col">
+    <div class="col col-md-12 col-sm-12 col-12">
       <span *ngFor="let filter of metadata.filters" class="component-group">
         <mat-checkbox [checked]="selectedFilters.indexOf(filter) > -1" [(ngModel)]="filter.selected" (change)="onFilterChanged(filter)">
         </mat-checkbox>
@@ -58,7 +58,7 @@
   <div class="mb-3"></div>
 
   <div class="row">
-    <div class="col">
+    <div class="col col-md-12 col-sm-12 col-12">
       <mat-table #table [dataSource]="dataSource" class="mat-elevation-z8">
         <ng-container matColumnDef="select">
           <mat-header-cell *matHeaderCellDef ngClass="select">
@@ -101,7 +101,7 @@
   </div>
 
   <div class="row">
-      <div class="col">
+      <div class="col col-md-6 col-sm-12 col-12">
         <mat-form-field class="full-width" *ngIf="dataSource.data && dataSource.data.length" matTooltip="Concatenates UNIQUE column values from selected rows (Considers all if none selected)"
           matTooltipPosition='right'>
           <mat-label>Concatenate Column Values: </mat-label>
@@ -114,7 +114,7 @@
         </mat-form-field>
   
       </div>
-      <div class="col flex-end">
+      <div class="col col-md-6 col-sm-12 col-12 flex-end">
         <button *ngIf="dataSource.data && dataSource.data.length" mat-raised-button color="primary" 
         matTooltip="Copy selected rows (Considers all if none selected)" (click)="copyDocuments()">Copy
           Document(s)

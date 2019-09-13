@@ -53,6 +53,16 @@ a:hover {
 }
 .header {
   background: $primary !important;
+  height: 4em !important;
+}
+@media (max-width: 680px) {
+  .header h3{ 
+    font-size: 1.25rem;
+  }
+}
+.section {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .section-title {

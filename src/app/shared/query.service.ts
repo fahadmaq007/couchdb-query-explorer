@@ -1,12 +1,12 @@
-import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {AppConfig} from '../config/app.config';
-import {Observable} from 'rxjs/Observable';
-import {catchError, map} from 'rxjs/operators';
-import {_throw} from 'rxjs/observable/throw';
-import {of} from 'rxjs/observable/of';
-import {DbInfo} from './dbinfo.model';
-import {SettingService} from './setting.service';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AppConfig } from '../config/app.config';
+import { Observable } from 'rxjs/Observable';
+import { catchError, map } from 'rxjs/operators';
+import { _throw } from 'rxjs/observable/throw';
+import { of } from 'rxjs/observable/of';
+import { DbInfo } from './dbinfo.model';
+import { SettingService } from './setting.service';
 
 @Injectable()
 export class QueryService {
@@ -18,24 +18,15 @@ export class QueryService {
     private db: any;
 
     constructor(private httpClient: HttpClient, private settingService: SettingService) {
-        this.headers = new HttpHeaders({'Content-Type': 'application/json'});
-    }
-
-    listAllDbs(): Observable<DbInfo[]> {
-        var url = this.settingService.getCouchUrl() + '/_all_dbs';
-        return this.httpClient.get(url, {
-            'headers': this.headers
-        }).pipe(catchError(
-            error => this.handleError(error)
-        ));
+        this.headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     }
 
     private handleError(error: any) {
-    if (error instanceof Response) {
-        return _throw(error.json()['error'] || 'backend server error');
-    }
-    // in a case server returns 400 error, which means no data found
-    return of([]);
+        if (error instanceof Response) {
+            return _throw(error.json()['error'] || 'backend server error');
+        }
+        // in a case server returns 400 error, which means no data found
+        return of([]);
     }
 
     setCurrentDatabase(db: string) {
@@ -72,11 +63,11 @@ export class QueryService {
         }
         filters.forEach(each => {
             let filter = JSON.parse(JSON.stringify(each)); // clone
-            if (! filter.value) {
+            if (!filter.value) {
                 filter.value = filter.$$value;
             }
             if (filter.operation == '$regex') {
-                filter.value = "(?i)" + filter.value; 
+                filter.value = "(?i)" + filter.value;
             }
             qObject.selector[filter.field] = {};
             qObject.selector[filter.field][filter.operation] = filter.value;
@@ -87,10 +78,10 @@ export class QueryService {
         var url = this.getDbUrl() + '/_find';
         var qObject = this.prepareQueryObject(filters, page);
         console.log("qObject: " + JSON.stringify(qObject));
-        
+
         return this.httpClient.post(url, qObject)
-        .pipe(catchError(
-            error => this.handleError(error)
-        ));
+            .pipe(catchError(
+                error => this.handleError(error)
+            ));
     }
 }

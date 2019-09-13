@@ -80,7 +80,7 @@ export class QueryComponent implements OnInit {
   }
 
   loadAllDbs(): void {
-    this.queryService.listAllDbs().subscribe((dbs: Array<DbInfo>) => {
+    this.settingService.listAllDbs().subscribe((dbs: Array<DbInfo>) => {
       this.dbs = this.filter(dbs, { exclude_: true });
       this.selectedDb = this.metadata.selectedDb;
       if (! this.selectedDb) {

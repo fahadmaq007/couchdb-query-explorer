@@ -19,7 +19,6 @@ export class QueryComponent implements OnInit {
   objectKeys = Object.keys;
   private dbClientUrl: string;
   selectedFilters: any[] = [];
-  selectedDb: string;
   _idFilter: any = { "field": "_id", "operation": "$eq" };
   dbs: DbInfo[];
   dataSource = new MatTableDataSource<any>();
@@ -28,7 +27,7 @@ export class QueryComponent implements OnInit {
   pageLength: number;
   isLoading: boolean = false;
   selection = new SelectionModel<any>(true, []);
-  displayedColumns: string[] = ['select'];
+  displayedColumns: string[] = [];
   filters: any[] = [];
   downloadJsonHref: SafeUrl;
 
@@ -76,31 +75,32 @@ export class QueryComponent implements OnInit {
   loadAllDbs(): void {
     this.appService.listAllDbs().subscribe((dbs: Array<DbInfo>) => {
       this.dbs = this.appService.filterUnderscoreDbs(dbs);
-      this.selectedDb = this.metadata.selectedDb;
-      if (!this.selectedDb) {
-        this.selectedDb = this.dbs[0] + "";
+      var selectedDb = this.metadata.selectedDb;
+      if (! selectedDb) {
+        this.metadata.selectedDb = this.dbs[0] + "";
       }
       this.onDbChange();
     });
   }
-
-  onDbChange(): void {
-    this.appService.setSelectedDb(this.selectedDb);
+  
+  public onDbChange(): void {
+    console.log("onDbChange" + this.metadata.selectedDb);
+    this.appService.setSelectedDb(this.metadata.selectedDb);
     this.mergeFilters();
-    var columns = this.metadata.fields;
-    // if (this.metadata[this.selectedDb] && this.metadata[this.selectedDb].fields) {
-    //   columns = columns.concat(this.metadata[this.selectedDb].fields);
-    // }
+    var columns = ['select'].concat(this.metadata.fields);
+    if (this.metadata[this.metadata.selectedDb] && this.metadata[this.metadata.selectedDb].fields) {
+      columns = columns.concat(this.metadata[this.metadata.selectedDb].fields);
+    }
     this.displayedColumns = columns;
-    console.log('selected: ' + this.selectedDb, this.displayedColumns);
-    this.showMessage("Database changed to " + this.selectedDb);
+    console.log('displayedColumns: ' + this.metadata.selectedDb, this.displayedColumns);
+    this.showMessage("Database changed to " + this.metadata.selectedDb);
     this.executeQuery();
   }
 
   private mergeFilters(): void {
     var filters = this.appService.clone(this.metadata.filters);
-    if (this.selectedDb) {
-      var dbConf = this.metadata[this.selectedDb];
+    if (this.metadata.selectedDb) {
+      var dbConf = this.metadata[this.metadata.selectedDb];
       if (dbConf) {
         var dbFilters = dbConf.filters;
         if (dbFilters) {

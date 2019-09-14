@@ -1,3 +1,4 @@
+/* You can add global styles to this file, and also import other style files */
 $green: rgba(2, 184, 117, 1);
 $anchor-color: #007bff;
 $primary: #563d7c;
@@ -9,13 +10,13 @@ $info-text: rgba(0,0,0,.54);
 // IMPORTS
 
 // - VENDORS
-@import './vendors/normalize';
+// @import './scss/vendors/normalize';
 
 // - BASIC
 // @import './basic/main';
 
 // - LOADING
-@import './basic/loading';
+@import './scss/basic/loading';
 
 
 // - Angular material theme
@@ -100,9 +101,15 @@ snack-bar-container {
 .mat-cell, .mat-header-cell {
   white-space: nowrap;
   text-overflow: ellipsis;
-  margin-right: 5px;
+  margin-right: 8px;
+  width: 150px;
 }
-
+mat-header-row, mat-footer-row, mat-row {
+  min-height: 40px !important;
+}
+mat-header-row {
+  background-color: #dddddd !important;
+}
 .mat-raised-button[disabled] {
   background: #bbb !important;
 }
@@ -183,10 +190,10 @@ snack-bar-container {
   font-size: 12px;
 }
 ._id, .select {
-flex: 0 0 40px !important;
+flex: 0 0 50px !important;
 }
 .type {
-flex: 0 0 100px !important;
+flex: 0 0 90px !important;
 }
 .nav-container {
   width: 100%;
@@ -210,4 +217,7 @@ flex: 0 0 100px !important;
 .info-text {
   color: $info-text;
   font-size: 0.85em;
+}
+.copy {
+  text-overflow: ellipsis;
 }

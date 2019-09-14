@@ -142,13 +142,13 @@ export class SettingComponent implements OnInit {
   public onDbChange(): void {
     var db = this.metadata.selectedDb;
     console.log('selected: ' + db);
-    if (db) {
-      var dbMeta = this.metadata[db];
-      if (! dbMeta) {
-        dbMeta = {};
-        this.metadata[db] = dbMeta;
-      }
-    }
+    // if (db) {
+    //   var dbMeta = this.metadata[db];
+    //   if (! dbMeta) {
+    //     dbMeta = {};
+    //     this.metadata[db] = dbMeta;
+    //   }
+    // }
   }
 
   private storeSettings(settings): void {

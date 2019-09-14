@@ -1,4 +1,4 @@
-ng build -prod --base-href "/couchdb-query-explorer/"
+ng build --prod --base-href "/couchdb-query-explorer/"
 rm -rf docker/dist
 mv dist docker/
 

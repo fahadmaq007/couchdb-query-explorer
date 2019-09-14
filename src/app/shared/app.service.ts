@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { catchError, map } from 'rxjs/operators';
 import { _throw } from 'rxjs/observable/throw';
 import { of } from 'rxjs/observable/of';
+import 'rxjs/add/operator/map';
 import { DbInfo } from './dbinfo.model';
 import { Observer } from 'rxjs/Observer';
 import { isObject } from 'util';
@@ -75,11 +76,7 @@ export class AppService {
 
     public listAllDbs(): Observable<DbInfo[]> {
         var url = this.getCouchUrl() + '/_all_dbs';
-        return this.httpClient.get(url, {
-            
-        }).pipe(catchError(
-            error => this.handleError(error)
-        ));
+        return this.httpClient.get<DbInfo[]>(url);
     }
 
     public getSelectedDb(): string {
@@ -146,7 +143,7 @@ export class AppService {
         var qObject = this.prepareQueryObject(filters, page);
         console.log("qObject: " + JSON.stringify(qObject));
 
-        return this.httpClient.post(url, qObject)
+        return this.httpClient.post<any[]>(url, qObject)
             .pipe(catchError(
                 error => this.handleError(error)
             ));

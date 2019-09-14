@@ -1,0 +1,1 @@
+docker run -d --name=couchdb-explorer -p 8855:80 maqboolahmed/couchdb-query-explorer:0.5

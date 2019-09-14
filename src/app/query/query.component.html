@@ -4,7 +4,7 @@
     <div class="col col-md-6 col-sm-12 col-12">
       <mat-form-field class="full-width">
         <mat-label>Database: </mat-label>
-        <mat-select matNativeControl [(value)]="selectedDb" (change)="onDbChange()" color="accent">
+        <mat-select [(ngModel)]="metadata.selectedDb" (selectionChange)="onDbChange()" color="accent">
           <mat-option *ngFor="let db of dbs" [value]="db">
             <span *ngIf="metadata[db] && metadata[db].name">{{metadata[db].name}}</span>
             <span *ngIf="!metadata[db] || !metadata[db].name">{{db}}</span>
@@ -13,7 +13,7 @@
       </mat-form-field>
     </div>
     <div class="col col-md-6 col-sm-12 col-12">
-      <span *ngIf="selectedDb">
+      <span *ngIf="metadata.selectedDb">
         <mat-form-field class="full-width">
           <input matInput placeholder="Key in document _id & hit Enter" [(ngModel)]="_idFilter.value" (keyup.enter)="showDocumentById()">
           <button mat-button *ngIf="_idFilter.value" matSuffix mat-icon-button aria-label="Clear" (click)="_idFilter.value=undefined">
@@ -23,7 +23,7 @@
       </span>
     </div>
   </div>
-  
+
   <div class="row">
     <div class="col col-md-12 col-sm-12 col-12">
       <span *ngFor="let filter of filters" class="component-group">
@@ -37,21 +37,21 @@
           </a>
 
           <span class="filter-wrapper" *ngIf="filter.$$edit">
-            <input placeholder="Value" matTooltip="Key in & hit Enter" [(ngModel)]="filter.value"
-              (keyup.enter)="filter.selected = true; onFilterChanged(filter)">
+            <input placeholder="Value" matTooltip="Key in & hit Enter" [(ngModel)]="filter.value" (keyup.enter)="filter.selected = true; onFilterChanged(filter)">
             <!-- <button mat-button *ngIf="filter.value" matSuffix mat-icon-button aria-label="Clear" (click)="filter.value=undefined">
-              <i class="fas fa-times"></i>
-            </button> -->
+                <i class="fas fa-times"></i>
+              </button> -->
           </span>
-          
+
         </span>
       </span>
 
-      <button mat-raised-button color="primary" class="component-group" (click)="clearFilterSelection()" *ngIf="selectedFilters.length">
+      <button mat-raised-button color="primary" class="component-group ml-1" (click)="clearFilterSelection()" *ngIf="selectedFilters.length">
         Clear Selection
       </button>
 
-      <button mat-raised-button color="primary" class="component-group" (click)="copySelectors()" *ngIf="selectedFilters.length" matTooltip="Copy the query as JSON text">
+      <button mat-raised-button color="primary" class="component-group ml-2" (click)="copySelectors()" *ngIf="selectedFilters.length"
+        matTooltip="Copy the query as JSON text">
         Copy Query
       </button>
     </div>
@@ -61,35 +61,30 @@
   <div class="row">
     <div class="col col-md-12 col-sm-12 col-12">
       <mat-table #table [dataSource]="dataSource" class="mat-elevation-z8">
-        <ng-container matColumnDef="select">
-          <mat-header-cell *matHeaderCellDef ngClass="select">
-            <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
+        <ng-container matColumnDef="{{column}}" *ngFor="let column of displayedColumns">
+          <mat-header-cell *matHeaderCellDef [ngClass]="column">
+            <mat-checkbox *ngIf="column == 'select'" (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
               [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
             </mat-checkbox>
+            <span *ngIf="column != 'select'"><b>{{ column }}</b></span>
           </mat-header-cell>
-          <mat-cell *matCellDef="let row" ngClass="select">
-            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
-              [aria-label]="checkboxLabel(row)">
-            </mat-checkbox>
-          </mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="{{column}}" *ngFor="let column of metadata.fields">
-          <mat-header-cell *matHeaderCellDef [ngClass]="column"> <span><b>{{ column }}</b></span> </mat-header-cell>
           <mat-cell *matCellDef="let element" [ngClass]="column">
-            <span *ngIf="column == '_id'" matTooltip="Open Document {{appService.stringify(element)}}" matTooltipPosition='after'
-              ngxClipboard [cbContent]="element[column]" (click)="showMessage('Copied _id')">
+            <mat-checkbox *ngIf="column == 'select'" (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+              [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+            </mat-checkbox>
+            <span *ngIf="column == '_id'" matTooltip="Open Document {{appService.stringify(element)}}"
+              matTooltipPosition='after' ngxClipboard [cbContent]="element[column]" (click)="showMessage('Copied _id')">
               <a href="{{dbClientUrl}}/{{element[column]}}" target="_blank">
                 <i class="fas fa-external-link-alt"></i>
               </a>
             </span>
-            <a class="copy" *ngIf="column != '_id' && element[column]" ngxClipboard [cbContent]="element[column]"
+            <a class="copy" *ngIf="column != '_id' && column != 'select' && element[column]" ngxClipboard [cbContent]="element[column]"
               matTooltip="Copy text" (click)="showMessage('Copied Text')">{{element[column]}} </a>
           </mat-cell>
           <mat-cell *matHeaderCellDef> <span><b>Showing {{dataSource.data.length}} documents</b></span> </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></mat-row>
       </mat-table>
 
@@ -102,32 +97,32 @@
   </div>
 
   <div class="row">
-      <div class="col col-md-6 col-sm-6 col-12 mt-3">
-        <div class="info-text">
-          <span *ngIf="dataSource.data.length">Showing {{dataSource.data.length}} documents</span>
-          <span *ngIf="!dataSource.data">No documents found</span>
-        </div>
-      </div>
-      <div class="col col-md-6 col-sm-6 col-12 flex-end">
-        <mat-form-field *ngIf="dataSource.data && dataSource.data.length" matTooltip="Concatenates UNIQUE column values from selected rows (Considers all if none selected)"
-          matTooltipPosition='right'>
-          <mat-label>Concatenate Column Values: </mat-label>
-          <mat-select [(value)]="concatenateField" (change)="concatenate(concatenateField); concatenateField=undefined" color="accent">
-            <mat-option *ngFor="let field of metadata.fields" [value]="field">
-              {{field}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <button *ngIf="dataSource.data && dataSource.data.length" mat-raised-button color="primary" class="ml-3"
-        matTooltip="Copy selected rows (Considers all if none selected)" (click)="copyDocuments()">Copy
-          Documents
-        </button>
-
-        <a  *ngIf="dataSource.data && dataSource.data.length" mat-raised-button color="primary" class="ml-3" 
-        title="Download JSON" [href]="downloadJsonHref" download="download.json" (click)="generateDownloadJsonUri()"
-        matTooltip="Download selected rows (Considers all if none selected)" >Download</a>
-        <!-- <mat-paginator #paginator [length]="pageLength" [pageSizeOptions]="[10, 20, 50]" (page)="onPageEvent($event)" ></mat-paginator> -->
+    <div class="col col-md-6 col-sm-6 col-12 mt-3">
+      <div class="info-text">
+        <span *ngIf="dataSource.data.length">Showing {{dataSource.data.length}} documents</span>
+        <span *ngIf="!dataSource.data">No documents found</span>
       </div>
     </div>
+    <div class="col col-md-6 col-sm-6 col-12 flex-end">
+      <mat-form-field *ngIf="dataSource.data && dataSource.data.length" matTooltip="Concatenates UNIQUE column values from selected rows (Considers all if none selected)"
+        matTooltipPosition='right'>
+        <mat-label>Concatenate Column Values: </mat-label>
+        <mat-select [(value)]="concatenateField" (change)="concatenate(concatenateField); concatenateField=undefined"
+          color="accent">
+          <mat-option *ngFor="let field of metadata.fields" [value]="field">
+            {{field}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button *ngIf="dataSource.data && dataSource.data.length" mat-raised-button color="primary" class="ml-3"
+        matTooltip="Copy selected rows (Considers all if none selected)" (click)="copyDocuments()">Copy
+        Documents
+      </button>
+
+      <a *ngIf="dataSource.data && dataSource.data.length" mat-raised-button color="primary" class="ml-3" title="Download JSON"
+        [href]="downloadJsonHref" download="download.json" (click)="generateDownloadJsonUri()" matTooltip="Download selected rows (Considers all if none selected)">Download</a>
+      <!-- <mat-paginator #paginator [length]="pageLength" [pageSizeOptions]="[10, 20, 50]" (page)="onPageEvent($event)" ></mat-paginator> -->
+    </div>
+  </div>
 
 </div>

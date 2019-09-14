@@ -1,12 +1,12 @@
 import { Component, OnInit, Inject, ViewChild } from '@angular/core';
-import { SettingService } from '../shared/setting.service';
-import { QueryService } from '../shared/query.service';
-import {DbInfo} from '../shared/dbinfo.model';
-import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import { AppService } from '../shared/app.service';
+import { DbInfo } from '../shared/dbinfo.model';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material';
 import { ClipboardService } from 'ngx-clipboard'
 import { SelectionModel } from '@angular/cdk/collections';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-query',
@@ -20,20 +20,22 @@ export class QueryComponent implements OnInit {
   private dbClientUrl: string;
   selectedFilters: any[] = [];
   selectedDb: string;
-  _idFilter: any = {"field": "_id", "operation": "$eq"};
+  _idFilter: any = { "field": "_id", "operation": "$eq" };
   dbs: DbInfo[];
   dataSource = new MatTableDataSource<any>();
   // MatPaginator Output
-  pageEvent: PageEvent = {pageIndex: 0, pageSize: 100, length: 0};
+  pageEvent: PageEvent = { pageIndex: 0, pageSize: 100, length: 0 };
   pageLength: number;
   isLoading: boolean = false;
   selection = new SelectionModel<any>(true, []);
   displayedColumns: string[] = ['select'];
+  filters: any[] = [];
+  downloadJsonHref: SafeUrl;
 
-  constructor(private queryService: QueryService, private snackBar: MatSnackBar,
-     private settingService: SettingService , private clipboardService: ClipboardService) { 
-      
-     }
+  constructor(private appService: AppService, private snackBar: MatSnackBar,
+    private clipboardService: ClipboardService, private sanitizer: DomSanitizer) {
+
+  }
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -44,7 +46,7 @@ export class QueryComponent implements OnInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
-  
+
   ngOnInit() {
     this.loadSettings();
   }
@@ -59,8 +61,8 @@ export class QueryComponent implements OnInit {
   /** Selects all rows if they are not all selected; otherwise clear selection. */
   masterToggle() {
     this.isAllSelected() ?
-        this.selection.clear() :
-        this.dataSource.data.forEach(row => this.selection.select(row));
+      this.selection.clear() :
+      this.dataSource.data.forEach(row => this.selection.select(row));
   }
 
   /** The label for the checkbox on the passed row */
@@ -71,19 +73,11 @@ export class QueryComponent implements OnInit {
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
   }
 
-  private filter(dbs, criteria): Array<DbInfo> {
-    var exclude_ = criteria ? criteria.exclude_ : false;
-    if (dbs) {
-      dbs = dbs.filter(db => exclude_ && ! db.startsWith("_"));
-    }
-    return dbs;
-  }
-
   loadAllDbs(): void {
-    this.settingService.listAllDbs().subscribe((dbs: Array<DbInfo>) => {
-      this.dbs = this.filter(dbs, { exclude_: true });
+    this.appService.listAllDbs().subscribe((dbs: Array<DbInfo>) => {
+      this.dbs = this.appService.filterUnderscoreDbs(dbs);
       this.selectedDb = this.metadata.selectedDb;
-      if (! this.selectedDb) {
+      if (!this.selectedDb) {
         this.selectedDb = this.dbs[0] + "";
       }
       this.onDbChange();
@@ -91,50 +85,54 @@ export class QueryComponent implements OnInit {
   }
 
   onDbChange(): void {
-    console.log('selected: ' + this.selectedDb);
-    this.queryService.setCurrentDatabase(this.selectedDb);
-    this.settingService.setSelectedDb(this.selectedDb);
+    this.appService.setSelectedDb(this.selectedDb);
+    this.mergeFilters();
+    var columns = this.metadata.fields;
+    // if (this.metadata[this.selectedDb] && this.metadata[this.selectedDb].fields) {
+    //   columns = columns.concat(this.metadata[this.selectedDb].fields);
+    // }
+    this.displayedColumns = columns;
+    console.log('selected: ' + this.selectedDb, this.displayedColumns);
     this.showMessage("Database changed to " + this.selectedDb);
     this.executeQuery();
   }
 
-  private loadSettings(): any {
-    this.metadata = this.settingService.load();
-    if (this.metadata) {
-      this.loadAllDbs();
-      this.displayedColumns = this.displayedColumns.concat(this.metadata.fields);
-      this.queryService.setMetaData(this.metadata);
-    } else {
-      console.error("no metadata found, creating default...");
-      this.settingService.getMetaDataJson().subscribe(data => {
-        console.error("no metadata found, creating default...", data);
-        this.settingService.store(data);
-        this.loadSettings();
-      });
+  private mergeFilters(): void {
+    var filters = this.appService.clone(this.metadata.filters);
+    if (this.selectedDb) {
+      var dbConf = this.metadata[this.selectedDb];
+      if (dbConf) {
+        var dbFilters = dbConf.filters;
+        if (dbFilters) {
+          filters = dbFilters.concat(filters);
+        }
+      }
     }
+    this.filters = filters;
+  }
+
+  private loadSettings(): any {
+    this.appService.initializeMeta().subscribe(metadata => {
+      this.metadata = metadata;
+      console.log("Query loadMeta", this.metadata)
+      this.loadAllDbs();
+    });
   }
 
   executeQuery(): void {
-    if (! this.selectedFilters.length) {
+    if (!this.selectedFilters.length) {
       this.dataSource.data = [];
       return;
     }
     this.isLoading = true;
-    this.dbClientUrl = this.queryService.getDbClientUrl();
+    this.dbClientUrl = this.appService.getDbClientUrl();
     var pageEvent = this.pageEvent;
     var pageSize = pageEvent.pageSize;
-    var page = {pageIndex: pageEvent.pageIndex, pageSize: pageSize};
-    console.log("executeQuery", page);
-    this.queryService.executeQuery(this.selectedFilters, page).subscribe(data => {
+    var page = { pageIndex: pageEvent.pageIndex, pageSize: pageSize };
+    this.appService.executeQuery(this.selectedFilters, page).subscribe(data => {
       var docs = data["docs"];
-      if (docs.length == 0) {
-        this.showMessage("No documents found.");
-      } else {
-        this.showMessage("Showing " + docs.length + " documents.");
-      }
       this.dataSource.data = docs;
-      this.pageLength = docs.length < pageSize ? docs.length : page["length"];
-      console.log("data: ", this.dataSource.data);
+      this.pageLength = docs.length < pageSize ? docs.length : page["length"];  
       this.isLoading = false;
     });
   }
@@ -145,19 +143,20 @@ export class QueryComponent implements OnInit {
     });
   }
   onFilterChanged(filter): void {
-    delete filter.$$edit; 
+    delete filter.$$edit;
     console.log("onFilterChanged", filter);
     var index = this.selectedFilters.indexOf(filter);
     if (filter.selected) {
       if (index == -1) {
         this.selectedFilters.push(filter);
-      } 
+      }
     } else {
       if (index > -1) {
         this.selectedFilters.splice(index, 1);
       }
     }
-    this.executeQuery(); 
+    delete filter.selected;
+    this.executeQuery();
   }
 
   clearFilterSelection(): void {
@@ -182,7 +181,7 @@ export class QueryComponent implements OnInit {
     if (length == 0) {
       return;
     }
-    var qObject = this.queryService.prepareQueryObject(this.selectedFilters, undefined);
+    var qObject = this.appService.prepareQueryObject(this.selectedFilters, undefined);
     var text = JSON.stringify(qObject);
     this.clipboardService.copyFromContent(text);
     this.showMessage("Copied Text");
@@ -195,7 +194,7 @@ export class QueryComponent implements OnInit {
       data = this.selection.selected;
     }
     var ids = "";
-    if (! field) {
+    if (!field) {
       field = "_id";
     }
     if (data) {
@@ -212,7 +211,7 @@ export class QueryComponent implements OnInit {
     }
   }
 
-  copyDocuments(): void {
+  private getCopiedData(): string {
     const numSelected = this.selection.selected.length;
     var data = this.dataSource.data;
     if (numSelected > 0) {
@@ -231,13 +230,24 @@ export class QueryComponent implements OnInit {
         }
         text = "[" + text.substring(0, text.lastIndexOf(",")) + "]";
       }
-      this.clipboardService.copyFromContent(text);
-      this.showMessage("Copied Document(s)");
     }
+    return text;
   }
+  copyDocuments(): void {
+    var text = this.getCopiedData();
+    this.clipboardService.copyFromContent(text);
+    this.showMessage("Copied Document(s)");
+  }
+
   onPageEvent(event): void {
     console.log(event);
     this.pageEvent = event;
     this.executeQuery();
+  }
+
+  generateDownloadJsonUri() {
+    var text = this.getCopiedData();
+    var uri = this.sanitizer.bypassSecurityTrustUrl("data:text/json;charset=UTF-8," + encodeURIComponent(text));
+    this.downloadJsonHref = uri;
   }
 }

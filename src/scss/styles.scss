@@ -1,10 +1,11 @@
 $green: rgba(2, 184, 117, 1);
 $anchor-color: #007bff;
 $primary: #563d7c;
-$primary-hover: #352053;
-$text-color: #6c757d;
+$primary-hover: #7c58b1;
+$text-color: rgba(0,0,0,.87);
 $header-text-color: #cbbde2;
 $accent: #ffe484;
+$info-text: rgba(0,0,0,.54);
 // IMPORTS
 
 // - VENDORS
@@ -30,9 +31,7 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
   background-color: $primary;
 }
 .mat-raised-button.mat-primary:hover {
-  background-color:  $accent;
-  border-color: $accent; 
-  color: $primary;
+  background-color: $primary-hover;
 }
 * {
   font-family: 'Roboto', sans-serif;
@@ -54,6 +53,13 @@ a:hover {
 .header {
   background: $primary !important;
   height: 4em !important;
+}
+.header .row {
+  height: 100%;
+  align-items: center;
+  color: white;
+  margin-left: 0px;
+  margin-right: -10px;
 }
 @media (max-width: 680px) {
   .header h3{ 
@@ -186,18 +192,6 @@ flex: 0 0 100px !important;
   width: 100%;
   height: 100%;
 }
-
-.sidenav-content {
-  display: flex;
-  height: 100%;
-  width: 100%;
-}
-
-.sidenav {
-  /* padding: 20px; */
-  width: 300px;
-  height: 100%;
-}
 .button-text {
   text-align: left !important;
   padding: 1px !important;
@@ -212,4 +206,8 @@ flex: 0 0 100px !important;
 }
 .content-card {
   padding: 0px !important;
+}
+.info-text {
+  color: $info-text;
+  font-size: 0.85em;
 }

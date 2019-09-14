@@ -35,46 +35,56 @@
               </div>
 
               <div class="col col-md-6 col-sm-12 col-12">
-                  <mat-slide-toggle [ngModel]="metadata.showUnderscoreDbs" labelPosition="before">Show Underscore Database</mat-slide-toggle>
+                  <mat-slide-toggle [(ngModel)]="metadata.includeUnderscoreDbs" (change)="onUnderscoreDbConfChanged()" labelPosition="before">Include Underscore Database</mat-slide-toggle>
               </div>
             </div>
           </section>
           <section class="section">
               <h4>Fields</h4><h6>These fields will be shown in the <a routerLink="">query table</a></h6>
               <span class="component-group" *ngFor="let field of metadata.fields; index as i;">
-                <mat-form-field *ngIf="selectedField == field">
-                  <input matInput type="text" placeholder="Field" [(ngModel)]="selectedField" (keyup.enter)="metadata.fields[i] = selectedField; selectedField =undefined">
-                </mat-form-field>
-                <a routerLink="." *ngIf="selectedField != field" (click)="selectedField = field">
-                  <span>{{field}}</span>
+                <span>{{field}}</span>
+                <a routerLink="." aria-label="Delete" (click)="delete(metadata.fields, field)">
+                  <i class="fas fa-times"></i>
                 </a>
               </span>
 
               <mat-form-field class="field">
-                <input matInput type="text" placeholder="New field" [(ngModel)]="newField" (keyup.enter)="addNewField()">
-                <button mat-button *ngIf="newField" matSuffix mat-icon-button aria-label="Clear" (click)="newField=''">
-                  <mat-icon>close</mat-icon>
-                </button>
+                <input matInput type="text" placeholder="New field" [(ngModel)]="newField" (keyup.enter)="addNewField(metadata, newField); newField = ''">
               </mat-form-field>
-              <a routerLink="." class="field" (click)="addNewField()">
+              <!-- <a routerLink="." class="field" (click)="addNewField(metadata.fields)">
                 + Add Field
-              </a>
+              </a> -->
           </section>
-          <section class="section">
+          <section class="section mb-3"><!-- Filters-->
               <h4>Filters</h4><h6>These filters will be shown in the <a routerLink="">query table</a></h6>
               <span *ngFor="let filter of metadata.filters" class="component-group">
-                <a routerLink="." (click)="openFilterDialog(filter)" class="">
+                <a routerLink="." (click)="openFilterDialog(metadata, filter)" class="">
                   <span *ngIf="filter.name">{{filter.name}}</span>
-                  <span *ngIf="! filter.name">{{filter.field | uppercase }} {{metadata.operations[filter.operation]}}
+                  <span *ngIf="! filter.name">{{filter.field }} {{metadata.operations[filter.operation]}}
                     {{filter.value}}</span>
+                </a>
+                <a routerLink="." aria-label="Delete" (click)="delete(metadata.filters, filter)">
+                  <i class="fas fa-times"></i>
                 </a>
               </span>
 
               <span class="field">
-                <a routerLink="." (click)="addNewFilter()">
+                <a routerLink="." (click)="addNewFilter(metadata)">
                   + Add Filter
                 </a>
               </span>
+          </section>
+
+          <section class="section"> <!-- Custom DB Names-->
+              <h4>Custom Database Names</h4><h6>Provide custom names to the databases</h6>
+              
+              <div *ngFor="let db of dbs">
+                <mat-form-field class="full-width" *ngIf="metadata[db]">
+                    <mat-label>{{db}} </mat-label>
+                    <input matInput type="text" placeholder="Custom name" [(ngModel)]="metadata[db].name" (keyup.enter)="storeSettings(this.metadata)">                
+                  </mat-form-field>
+              </div>
+              <!-- <mat-paginator #paginator [length]="dbs.length" [pageSizeOptions]="[3, 5]"></mat-paginator> -->
           </section>
         </mat-card-content>
       </mat-card>
@@ -89,52 +99,47 @@
                   <div class="col col-md-6 col-sm-12 col-12">
                     <mat-form-field class="full-width">
                       <mat-label>Database: </mat-label>
-                      <mat-select matNativeControl [(value)]="selectedDb" (change)="onDbChange()" color="accent">
+                      <mat-select matNativeControl [(value)]="metadata.selectedDb" (change)="onDbChange()" color="accent">
                         <mat-option *ngFor="let db of dbs" [value]="db">
-                          {{db}}
+                          <span *ngIf="metadata[db] && metadata[db].name">{{metadata[db].name}}</span>
+                          <span *ngIf="!metadata[db] || !metadata[db].name">{{db}}</span>
                         </mat-option>
                       </mat-select>
                     </mat-form-field>
                   </div>
-    
-                  <div class="col col-md-6 col-sm-12 col-12">
-                      
-                  </div>
                 </div>
               </section>
-              <section class="section">
-                  <h4>Fields</h4><h6>These fields will be shown in the <a routerLink="">query table</a></h6>
-                  <span class="component-group" *ngFor="let field of metadata.fields; index as i;">
-                    <mat-form-field *ngIf="selectedField == field">
-                      <input matInput type="text" placeholder="Field" [(ngModel)]="selectedField" (keyup.enter)="metadata.fields[i] = selectedField; selectedField =undefined">
-                    </mat-form-field>
-                    <a routerLink="." *ngIf="selectedField != field" (click)="selectedField = field">
-                      <span>{{field}}</span>
+              <section class="section" *ngIf="metadata[metadata.selectedDb]">
+                  <h4>Fields</h4><h6>These fields are specific to the selected database, will be shown in the <a routerLink="">query table</a></h6>
+                  <span class="component-group" *ngFor="let field of metadata[metadata.selectedDb].fields; index as i;">
+                    <span>{{field}}</span>
+                    <a routerLink="." aria-label="Delete" (click)="delete(metadata[metadata.selectedDb].fields, field)">
+                      <i class="fas fa-times"></i>
                     </a>
                   </span>
     
                   <mat-form-field class="field">
-                    <input matInput type="text" placeholder="New field" [(ngModel)]="newField" (keyup.enter)="addNewField()">
-                    <button mat-button *ngIf="newField" matSuffix mat-icon-button aria-label="Clear" (click)="newField=''">
-                      <mat-icon>close</mat-icon>
-                    </button>
+                    <input matInput type="text" placeholder="New field" [(ngModel)]="newDbField" (keyup.enter)="addNewField(metadata[metadata.selectedDb], newDbField); newDbField = ''">  
                   </mat-form-field>
-                  <a routerLink="." class="field" (click)="addNewField()">
+                  <!-- <a routerLink="." class="field" (click)="addNewField(metadata[metadata.selectedDb].fields)">
                     + Add Field
-                  </a>
+                  </a> -->
               </section>
-              <section class="section">
-                  <h4>Filters</h4><h6>These filters will be shown in the <a routerLink="">query table</a></h6>
-                  <span *ngFor="let filter of metadata.filters" class="component-group">
-                    <a routerLink="." (click)="openFilterDialog(filter)" class="">
+              <section class="section" *ngIf="metadata[metadata.selectedDb]">
+                  <h4>Filters</h4><h6>These filters are specific to the selected database, will be shown in the <a routerLink="">query table</a></h6>
+                  <span *ngFor="let filter of metadata[metadata.selectedDb].filters" class="component-group">
+                    <a routerLink="." (click)="openFilterDialog(metadata[metadata.selectedDb], filter)" class="">
                       <span *ngIf="filter.name">{{filter.name}}</span>
-                      <span *ngIf="! filter.name">{{filter.field | uppercase }} {{metadata.operations[filter.operation]}}
+                      <span *ngIf="! filter.name">{{filter.field }} {{metadata.operations[filter.operation]}}
                         {{filter.value}}</span>
+                    </a>
+                    <a routerLink="." aria-label="Delete" (click)="delete(metadata[metadata.selectedDb].filters, filter)">
+                      <i class="fas fa-times"></i>
                     </a>
                   </span>
     
                   <span class="field">
-                    <a routerLink="." (click)="addNewFilter()">
+                    <a routerLink="." (click)="addNewFilter(metadata[metadata.selectedDb])">
                       + Add Filter
                     </a>
                   </span>
@@ -145,39 +150,6 @@
 
     </div>
   </div>
-
-
-  <div class="margin"></div>
-  <!-- 
-  <mat-card class="fields-card">
-    <mat-card-header>
-      <mat-card-title>Fields</mat-card-title>
-      <mat-card-subtitle>These fields will be shown in the <a routerLink="">query table</a></mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <span class="component-group" *ngFor="let field of metadata.fields; index as i;">
-          <mat-form-field *ngIf="selectedField == field">
-            <input matInput type="text" placeholder="Field" [(ngModel)]="selectedField" (keyup.enter)="metadata.fields[i] = selectedField; selectedField =undefined">
-          </mat-form-field>
-          <a routerLink="." *ngIf="selectedField != field" (click)="selectedField = field">
-            <span>{{field}}</span>
-          </a>
-      </span>
-        
-      <mat-form-field class="field">
-        <input matInput type="text" placeholder="New field" [(ngModel)]="newField" (keyup.enter)="addNewField()">
-        <button mat-button *ngIf="newField" matSuffix mat-icon-button aria-label="Clear" (click)="newField=''">
-          <mat-icon>close</mat-icon>
-        </button>
-      </mat-form-field>
-      <a routerLink="." class="field" (click)="addNewField()">
-          + Add Field
-      </a>
-    </mat-card-content>
-  </mat-card>
-
-  <div class="margin"></div> -->
-
 
   <div class="margin"></div>
 

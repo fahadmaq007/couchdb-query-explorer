@@ -1,9 +1,9 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { SettingService } from '../shared/setting.service';
-import { QueryService } from '../shared/query.service';
+import { AppService } from '../shared/app.service';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { ClipboardService } from 'ngx-clipboard'
 import {MatSnackBar} from '@angular/material/snack-bar';
+import { DbInfo } from '../shared/dbinfo.model';
 @Component({
   selector: 'app-setting',
   templateUrl: './setting.component.html',
@@ -13,15 +13,17 @@ export class SettingComponent implements OnInit {
 
   metadata: any = {};
   newField = '';
+  newDbField = '';
   objectKeys = Object.keys;
   querylist: any[];
   private dbClientUrl: string;
   newFilter = {"field": "", "operation": "$eq", "value": ""};
   selectedField: string;
   importSettingText: string;
-
-  constructor(private queryService: QueryService, private snackBar: MatSnackBar, 
-    private clipboardService: ClipboardService, private settingService: SettingService, public dialog: MatDialog ) { 
+  dbs: DbInfo[];
+  
+  constructor(private appService: AppService, private snackBar: MatSnackBar, 
+    private clipboardService: ClipboardService, public dialog: MatDialog ) { 
        this.loadMetaData();
      }
 
@@ -30,32 +32,47 @@ export class SettingComponent implements OnInit {
   }
 
   private loadMetaData(): any {
-    this.metadata = this.settingService.load();
-    if (! this.metadata) {
-      this.settingService.getMetaDataJson().subscribe(data => {
-        this.metadata = data;
-        this.settingService.store(this.metadata);
-        this.queryService.setMetaData(this.metadata);
-        console.log("getMetaDataJson", this.metadata);
-      });
-    } else {
-      this.queryService.setMetaData(this.metadata);
-    }
+    this.appService.initializeMeta().subscribe(metadata=> {
+      this.metadata = metadata;
+      this.loadAllDbs();
+      console.log("loadMeta", this.metadata)
+    })
   }
 
-   addNewField(): void {
-    console.log(this.newField + " is added");
-    if (this.newField.length) {
-      var fields = this.metadata.fields;
-      if (fields) {
-        fields.push(this.newField);
-        this.newField = '';
-        this.saveSettings();
+  loadAllDbs(): void {
+    this.appService.listAllDbs().subscribe((dbs: Array<DbInfo>) => {
+      this.dbs = this.appService.filterUnderscoreDbs(dbs);
+      this.createEmptyDatabaseMetadata();
+      console.log("loadDbs", this.dbs)
+    });
+  }
+
+  private createEmptyDatabaseMetadata(): void {
+    this.dbs.forEach(db => {
+      var dbMeta = this.metadata[db + ""];
+      var changed = false;
+      if (! dbMeta) {
+        dbMeta = {};
+        this.metadata[db + ""] = dbMeta;
+        changed = true;
       }
+      if (changed) {
+        this.appService.store(this.metadata);
+      }
+    });
+  }
+   addNewField(setting, field): void {
+    console.log(field + " is added");
+    if (field.length && setting) {
+      if (! setting.fields) {
+        setting.fields = [];
+      }
+      setting.fields.push(field);
+      this.saveSettings();
     }
   }
 
-   openFilterDialog(filter): void {
+   openFilterDialog(settingsObj, filter): void {
     const dialogData = {filter: filter, metadata: this.metadata };
     const dialogRef = this.dialog.open(FilterDialog, {
       width: '400px',
@@ -65,23 +82,35 @@ export class SettingComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed', result);
       if (result && result.filter) {
-        const index = this.metadata.filters.indexOf(result.filter);
+        if (! settingsObj.filters) {
+          settingsObj.filters = [];
+        }
+        const index = settingsObj.filters.indexOf(result.filter);
         console.log("index is " + index);
         if (index == -1) {
-          this.metadata.filters.push(result.filter);
+          settingsObj.filters.push(result.filter);
         } 
         this.saveSettings();
       }
     });
   }
 
-   addNewFilter(): void {
+  delete(list: any[], obj: any): void {
+    console.log("deleting " + obj);
+    const index = list.indexOf(obj);
+    if (index > -1) {
+      list.splice(index, 1);
+      this.saveSettings();
+    }
+  }
+   addNewFilter(settingsObj): void {
     let filter = JSON.parse(JSON.stringify(this.newFilter));
-    this.openFilterDialog(filter);
+    this.openFilterDialog(settingsObj, filter);
   }
 
    saveSettings() : void {
-    this.settingService.store(this.metadata);
+     console.log(this.metadata);
+    this.appService.store(this.metadata);
     this.showMessage("Settings Stored.");
   }
 
@@ -93,7 +122,7 @@ export class SettingComponent implements OnInit {
 
 
   public export(): void {
-    var settings = this.settingService.getMetaData();   
+    var settings = this.appService.getMetaData();   
     var text = JSON.stringify(settings);
     this.clipboardService.copyFromContent(text);
     this.showMessage("Copied Settings");
@@ -105,11 +134,33 @@ export class SettingComponent implements OnInit {
     }
     var settings = JSON.parse(this.importSettingText);
     if (settings) {
-      this.settingService.store(settings);
-      this.metadata = this.settingService.load();
+      this.storeSettings(settings);
       this.importSettingText = undefined;
-      this.showMessage("Settings Imported");
     }
+  }
+
+  public onDbChange(): void {
+    var db = this.metadata.selectedDb;
+    console.log('selected: ' + db);
+    if (db) {
+      var dbMeta = this.metadata[db];
+      if (! dbMeta) {
+        dbMeta = {};
+        this.metadata[db] = dbMeta;
+      }
+    }
+  }
+
+  private storeSettings(settings): void {
+    console.log("metadata[db]", this.metadata);
+    this.appService.store(settings);
+    this.showMessage("Settings Imported");
+    this.loadMetaData();
+  }
+
+  public onUnderscoreDbConfChanged(): void {
+    console.log("include", this.metadata.includeUnderscoreDbs);
+    this.storeSettings(this.metadata);
   }
  }
 

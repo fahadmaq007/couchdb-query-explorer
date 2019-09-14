@@ -2,7 +2,7 @@
     "couchUrl": "http://localhost:5984",
     "fields": [ "_id", "type", "channel", "parentId" ],
     "filters": [ {
-        "field": "type", "operation": "$eq", "value": ""
+        "field": "type", "operation": "$eq", "value": "", "name": "Type"
     }],
     "operations": {
         "$eq": "is",

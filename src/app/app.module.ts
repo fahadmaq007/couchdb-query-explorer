@@ -24,7 +24,7 @@ import {APP_CONFIG, AppConfig} from './config/app.config';
 import {HeaderComponent} from './header/header.component';
 import { QueryComponent } from './query/query.component';
 import { StateService } from './services/state/state.service';
-import { QueryService } from './shared/query.service';
+import { AppService } from './shared/app.service';
 
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatDialogModule} from '@angular/material/dialog';
@@ -32,7 +32,6 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatSelectModule} from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import { SettingService } from './shared/setting.service';
 import { SettingComponent, FilterDialog } from './setting/setting.component';
 
 import { ClipboardModule } from 'ngx-clipboard';
@@ -87,7 +86,7 @@ const routes: Routes = [
   providers: [
     {provide: 'state', useClass: StateService},
     {provide: APP_CONFIG, useValue: AppConfig},
-    QueryService, SettingService, FilterDialog
+    AppService, FilterDialog
   ],
   bootstrap: [AppComponent]
 })

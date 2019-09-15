@@ -93,8 +93,12 @@ export class QueryComponent implements OnInit {
     }
     this.displayedColumns = columns;
     console.log('displayedColumns: ' + this.metadata.selectedDb, this.displayedColumns);
-    this.showMessage("Database changed to " + this.metadata.selectedDb);
-    this.executeQuery();
+    var db = this.metadata.selectedDb;
+    if (this.metadata[db] && this.metadata[db].name) {
+      db = this.metadata[db].name;
+    }
+    this.showMessage("Database changed to " + db);
+    this.clearFilterSelection();
   }
 
   private mergeFilters(): void {
@@ -161,6 +165,7 @@ export class QueryComponent implements OnInit {
 
   clearFilterSelection(): void {
     this.selectedFilters = [];
+    this.dataSource.data = [];
   }
 
   copyDocumentId(): void {

@@ -98,6 +98,9 @@ snack-bar-container {
 .mat-column-select {
   overflow: initial;
 }
+.mat-cell, .mat-header-cell {
+  margin-right: 3px;
+}
 .mat-cell > a, .mat-header-cell > a {
   white-space: nowrap;
   text-overflow: ellipsis;

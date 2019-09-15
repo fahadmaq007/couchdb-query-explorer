@@ -58,7 +58,7 @@
           <section class="section mb-3"><!-- Filters-->
               <h4>Filters</h4><h6>These filters will be shown in the <a routerLink="">query table</a></h6>
               <span *ngFor="let filter of metadata.filters" class="component-group">
-                <a routerLink="." (click)="openFilterDialog(metadata, filter)" class="">
+                <a routerLink="." matTooltip="Click to edit" (click)="openFilterDialog(metadata, filter)" class="">
                   <span *ngIf="filter.name">{{filter.name}}</span>
                   <span *ngIf="! filter.name">{{filter.field }} {{metadata.operations[filter.operation]}}
                     {{filter.value}}</span>
@@ -128,7 +128,7 @@
               <section class="section" *ngIf="metadata[metadata.selectedDb]">
                   <h4>Filters</h4><h6>These filters are specific to the selected database, will be shown in the <a routerLink="">query table</a></h6>
                   <span *ngFor="let filter of metadata[metadata.selectedDb].filters" class="component-group">
-                    <a routerLink="." (click)="openFilterDialog(metadata[metadata.selectedDb], filter)" class="">
+                    <a routerLink="." matTooltip="Click to edit" (click)="openFilterDialog(metadata[metadata.selectedDb], filter)" class="">
                       <span *ngIf="filter.name">{{filter.name}}</span>
                       <span *ngIf="! filter.name">{{filter.field }} {{metadata.operations[filter.operation]}}
                         {{filter.value}}</span>

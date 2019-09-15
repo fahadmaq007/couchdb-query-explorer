@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 $green: rgba(2, 184, 117, 1);
-$anchor-color: #007bff;
+$anchor-color: #3f51b5;
 $primary: #563d7c;
 $primary-hover: #7c58b1;
 $text-color: rgba(0,0,0,.87);
@@ -8,26 +8,19 @@ $header-text-color: #cbbde2;
 $accent: #ffe484;
 $info-text: rgba(0,0,0,.54);
 $light-gray: rgba(0,0,0,.03);
+
 // IMPORTS
-
-// - VENDORS
-// @import './scss/vendors/normalize';
-
-// - BASIC
-// @import './basic/main';
-
 // - LOADING
 @import './scss/basic/loading';
-
 
 // - Angular material theme
 @import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
 
-$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
 @import "~@fortawesome/fontawesome-free/scss/fontawesome";
-@import "~@fortawesome/fontawesome-free/scss/regular";
 @import "~@fortawesome/fontawesome-free/scss/solid";
-@import "~@fortawesome/fontawesome-free/scss/brands";
+//@import "~@fortawesome/fontawesome-free/scss/regular";
+//@import "~@fortawesome/fontawesome-free/scss/brands";
 
 .mat-raised-button.mat-primary {
   background-color: $primary;
@@ -50,7 +43,7 @@ a, .cp {
   color: $text-color;
 }
 a:hover {
-  color: $primary;
+  color: $anchor-color;
 }
 .header {
   background: $primary !important;
@@ -173,7 +166,7 @@ mat-header-row {
 .component-group {
   border: 1px solid $primary;
   border-radius: 2px;
-  font-size: 12px;
+  font-size: 13px;
   padding: 5px;
   margin-right: 3px;
   margin-bottom: 3px;
@@ -187,7 +180,7 @@ mat-header-row {
   border-bottom: 1px solid #666; 
 }
 .filter-component > a {
-  color: $text-color;
+  color: $anchor-color;
 }
 
 .fields {

@@ -84,7 +84,7 @@
           <mat-cell *matHeaderCellDef> <span><b>Showing {{dataSource.data.length}} documents</b></span> </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+        <mat-header-row *matHeaderRowDef="displayedColumns;"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></mat-row>
       </mat-table>
 

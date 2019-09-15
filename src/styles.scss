@@ -7,6 +7,7 @@ $text-color: rgba(0,0,0,.87);
 $header-text-color: #cbbde2;
 $accent: #ffe484;
 $info-text: rgba(0,0,0,.54);
+$light-gray: rgba(0,0,0,.03);
 // IMPORTS
 
 // - VENDORS
@@ -108,9 +109,10 @@ snack-bar-container {
 }
 mat-header-row, mat-footer-row, mat-row {
   min-height: 40px !important;
+  border-bottom-color: $light-gray;
 }
 mat-header-row {
-  background-color: #dddddd !important;
+  background-color: $light-gray !important;
 }
 .mat-raised-button[disabled] {
   background: #bbb !important;

@@ -88,7 +88,7 @@
         <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></mat-row>
       </mat-table>
 
-      <mat-card *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center">
+      <mat-card *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center; border-radius: 0px">
         <mat-progress-spinner diameter="50" color="primary" mode="indeterminate">
         </mat-progress-spinner>
       </mat-card>
@@ -107,7 +107,7 @@
       <mat-form-field *ngIf="dataSource.data && dataSource.data.length" matTooltip="Concatenates UNIQUE column values from selected rows (Considers all if none selected)"
         matTooltipPosition='right'>
         <mat-label>Concatenate Column Values: </mat-label>
-        <mat-select [(value)]="concatenateField" (change)="concatenate(concatenateField); concatenateField=undefined"
+        <mat-select [(ngModel)]="concatenateField" (selectionChange)="concatenate(concatenateField); concatenateField=undefined"
           color="accent">
           <mat-option *ngFor="let field of metadata.fields" [value]="field">
             {{field}}

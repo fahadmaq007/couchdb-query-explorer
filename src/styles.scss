@@ -98,11 +98,10 @@ snack-bar-container {
 .mat-column-select {
   overflow: initial;
 }
-.mat-cell, .mat-header-cell {
+.mat-cell > a, .mat-header-cell > a {
   white-space: nowrap;
   text-overflow: ellipsis;
-  margin-right: 8px;
-  width: 150px;
+  overflow: hidden;
 }
 mat-header-row, mat-footer-row, mat-row {
   min-height: 40px !important;

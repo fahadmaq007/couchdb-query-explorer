@@ -100,9 +100,9 @@
               <h4>Custom Database Names</h4><h6>Provide custom names to the databases</h6>
               
               <div *ngFor="let db of dbs">
-                <mat-form-field class="full-width" *ngIf="metadata[db]">
+                <mat-form-field class="full-width" *ngIf="metadata.dbs[db]">
                     <mat-label>{{db}} </mat-label>
-                    <input matInput type="text" placeholder="Custom name" [(ngModel)]="metadata[db].name" (keyup.enter)="storeSettings(this.metadata)">                
+                    <input matInput type="text" placeholder="Custom name" [(ngModel)]="metadata.dbs[db].name" (keyup.enter)="storeSettings(this.metadata)">                
                   </mat-form-field>
               </div>
               <!-- <mat-paginator #paginator [length]="dbs.length" [pageSizeOptions]="[3, 5]"></mat-paginator> -->
@@ -122,8 +122,8 @@
                       <mat-label>Database: </mat-label>
                       <mat-select [(ngModel)]="metadata.selectedDb" (selectionChange)="onDbChange()">
                         <mat-option *ngFor="let db of dbs" [value]="db">
-                          <span *ngIf="metadata[db] && metadata[db].name">{{metadata[db].name}}</span>
-                          <span *ngIf="!metadata[db] || !metadata[db].name">{{db}}</span>
+                          <span *ngIf="metadata.dbs[db] && metadata.dbs[db].name">{{metadata.dbs[db].name}}</span>
+                          <span *ngIf="!metadata.dbs[db] || !metadata.dbs[db].name">{{db}}</span>
                         </mat-option>
                       </mat-select>
                     </mat-form-field>
@@ -133,40 +133,40 @@
               
               <mat-divider></mat-divider>
 
-              <section class="section" *ngIf="metadata[metadata.selectedDb]">
+              <section class="section" *ngIf="metadata.dbs[metadata.selectedDb]">
                   <h4>Fields</h4><h6>These fields are specific to the selected database, will be shown in the <a routerLink="">query table</a></h6>
-                  <span class="component-group" *ngFor="let field of metadata[metadata.selectedDb].fields; index as i;">
+                  <span class="component-group" *ngFor="let field of metadata.dbs[metadata.selectedDb].fields; index as i;">
                     <span>{{field}}</span>
-                    <a routerLink="." aria-label="Delete" (click)="delete(metadata[metadata.selectedDb].fields, field)">
+                    <a routerLink="." aria-label="Delete" (click)="delete(metadata.dbs[metadata.selectedDb].fields, field)">
                       <i class="fas fa-times ml-1"></i>
                     </a>
                   </span>
     
                   <mat-form-field class="field">
-                    <input matInput type="text" placeholder="New field" [(ngModel)]="newDbField" (keyup.enter)="addNewField(metadata[metadata.selectedDb], newDbField); newDbField = ''">  
+                    <input matInput type="text" placeholder="New field" [(ngModel)]="newDbField" (keyup.enter)="addNewField(metadata.dbs[metadata.selectedDb], newDbField); newDbField = ''">  
                   </mat-form-field>
-                  <!-- <a routerLink="." class="field" (click)="addNewField(metadata[metadata.selectedDb].fields)">
+                  <!-- <a routerLink="." class="field" (click)="addNewField(metadata.dbs[metadata.selectedDb].fields)">
                     + Add Field
                   </a> -->
               </section>
 
               <mat-divider></mat-divider>
 
-              <section class="section" *ngIf="metadata[metadata.selectedDb]">
+              <section class="section" *ngIf="metadata.dbs[metadata.selectedDb]">
                   <h4>Filters</h4><h6>These filters are specific to the selected database, will be shown in the <a routerLink="">query table</a></h6>
-                  <span *ngFor="let filter of metadata[metadata.selectedDb].filters" class="component-group">
-                    <a routerLink="." matTooltip="Click to edit" (click)="openFilterDialog(metadata[metadata.selectedDb], filter)" class="">
+                  <span *ngFor="let filter of metadata.dbs[metadata.selectedDb].filters" class="component-group">
+                    <a routerLink="." matTooltip="Click to edit" (click)="openFilterDialog(metadata.dbs[metadata.selectedDb], filter)" class="">
                       <span *ngIf="filter.name">{{filter.name}}</span>
                       <span *ngIf="! filter.name">{{filter.field }} {{metadata.operations[filter.operation]}}
                         {{filter.value}}</span>
                     </a>
-                    <a routerLink="." aria-label="Delete" (click)="delete(metadata[metadata.selectedDb].filters, filter)">
+                    <a routerLink="." aria-label="Delete" (click)="delete(metadata.dbs[metadata.selectedDb].filters, filter)">
                       <i class="fas fa-times ml-1"></i>
                     </a>
                   </span>
     
                   <span class="field">
-                    <a routerLink="." (click)="addNewFilter(metadata[metadata.selectedDb])">
+                    <a routerLink="." (click)="addNewFilter(metadata.dbs[metadata.selectedDb])">
                       + Add Filter
                     </a>
                   </span>
@@ -178,10 +178,12 @@
                   <h4>Associate Filters</h4><h6>In this section you can associate filters defined for other databases</h6>
                   <mat-form-field class="full-width">
                     <mat-label>Databases: </mat-label>
-                    <mat-select [(ngModel)]="metadata[metadata.selectedDb].associatedDbs" (selectionChange)="onAssociatedDbsChange(metadata[metadata.selectedDb])" multiple>
-                      <mat-option *ngFor="let db of dbs" [value]="db">
-                        <span *ngIf="metadata[db] && metadata[db].name">{{metadata[db].name}}</span>
-                        <span *ngIf="!metadata[db] || !metadata[db].name">{{db}}</span>
+                    <!-- [(ngModel)]="metadata.dbs[metadata.selectedDb].associatedDbs"  -->
+                    <mat-select [(ngModel)]="metadata.dbs[metadata.selectedDb].associatedDbs" (selectionChange)="onAssociatedDbsChange(metadata.dbs[metadata.selectedDb])" multiple>
+                      <mat-option *ngFor="let item of metadata.dbs | keyvalue" [value]="item.key">
+                          
+                        <span *ngIf="item.value.name">{{item.value.name}}</span>
+                        <span *ngIf="!item.value.name">{{item.key}}</span>
                       </mat-option>
                     </mat-select>
                   </mat-form-field>

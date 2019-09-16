@@ -92,21 +92,21 @@ export class QueryComponent implements OnInit {
     this.appService.setSelectedDb(this.metadata.selectedDb);
     this.mergeFilters();
     var columns = ['select'].concat(this.metadata.fields);
-    if (this.metadata[this.metadata.selectedDb] && this.metadata[this.metadata.selectedDb].fields) {
-      columns = columns.concat(this.metadata[this.metadata.selectedDb].fields);
+    if (this.metadata.dbs[this.metadata.selectedDb] && this.metadata.dbs[this.metadata.selectedDb].fields) {
+      columns = columns.concat(this.metadata.dbs[this.metadata.selectedDb].fields);
     }
     this.displayedColumns = columns;
     console.log('displayedColumns: ' + this.metadata.selectedDb, this.displayedColumns);
     var db = this.metadata.selectedDb;
-    if (this.metadata[db] && this.metadata[db].name) {
-      db = this.metadata[db].name;
+    if (this.metadata.dbs[db] && this.metadata.dbs[db].name) {
+      db = this.metadata.dbs[db].name;
     }
     this.showMessage("Database changed to " + db);
     this.clearFilterSelection();
   }
 
   private getDbFilters(db: string): any[] {
-    var dbConf = this.metadata[db];
+    var dbConf = this.metadata.dbs[db];
     var dbFilters: any[] = [];
     if (dbConf) {
       return dbConf.filters;
@@ -121,7 +121,7 @@ export class QueryComponent implements OnInit {
       if (dbFilters) {
         filters = dbFilters.concat(filters);
       }
-      var associatedDbs = this.metadata[this.metadata.selectedDb].associatedDbs;
+      var associatedDbs = this.metadata.dbs[this.metadata.selectedDb].associatedDbs;
       if (associatedDbs) {
         associatedDbs.forEach(db => {
           dbFilters = this.getDbFilters(db);

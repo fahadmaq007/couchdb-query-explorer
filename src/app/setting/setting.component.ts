@@ -49,11 +49,11 @@ export class SettingComponent implements OnInit {
 
   private createEmptyDatabaseMetadata(): void {
     this.dbs.forEach(db => {
-      var dbMeta = this.metadata[db + ""];
+      var dbMeta = this.metadata.dbs[db + ""];
       var changed = false;
       if (! dbMeta) {
         dbMeta = {};
-        this.metadata[db + ""] = dbMeta;
+        this.metadata.dbs[db + ""] = dbMeta;
         changed = true;
       }
       if (changed) {

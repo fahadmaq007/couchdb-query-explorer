@@ -6,8 +6,8 @@
         <mat-label>Database: </mat-label>
         <mat-select [(ngModel)]="metadata.selectedDb" (selectionChange)="onDbChange()" color="accent">
           <mat-option *ngFor="let db of dbs" [value]="db">
-            <span *ngIf="metadata[db] && metadata[db].name">{{metadata[db].name}}</span>
-            <span *ngIf="!metadata[db] || !metadata[db].name">{{db}}</span>
+            <span *ngIf="metadata.dbs[db] && metadata.dbs[db].name">{{metadata.dbs[db].name}}</span>
+            <span *ngIf="!metadata.dbs[db] || !metadata.dbs[db].name">{{db}}</span>
           </mat-option>
         </mat-select>
       </mat-form-field>

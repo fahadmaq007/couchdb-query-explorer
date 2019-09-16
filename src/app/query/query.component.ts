@@ -83,6 +83,10 @@ export class QueryComponent implements OnInit {
     });
   }
   
+  applyFilter(filterValue: string) {
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
   public onDbChange(): void {
     console.log("onDbChange" + this.metadata.selectedDb);
     this.appService.setSelectedDb(this.metadata.selectedDb);
@@ -101,15 +105,30 @@ export class QueryComponent implements OnInit {
     this.clearFilterSelection();
   }
 
+  private getDbFilters(db: string): any[] {
+    var dbConf = this.metadata[db];
+    var dbFilters: any[] = [];
+    if (dbConf) {
+      return dbConf.filters;
+    }
+    return dbFilters;
+  }
+
   private mergeFilters(): void {
     var filters = this.appService.clone(this.metadata.filters);
     if (this.metadata.selectedDb) {
-      var dbConf = this.metadata[this.metadata.selectedDb];
-      if (dbConf) {
-        var dbFilters = dbConf.filters;
-        if (dbFilters) {
-          filters = dbFilters.concat(filters);
-        }
+      var dbFilters = this.getDbFilters(this.metadata.selectedDb);
+      if (dbFilters) {
+        filters = dbFilters.concat(filters);
+      }
+      var associatedDbs = this.metadata[this.metadata.selectedDb].associatedDbs;
+      if (associatedDbs) {
+        associatedDbs.forEach(db => {
+          dbFilters = this.getDbFilters(db);
+          if (dbFilters) {
+            filters = dbFilters.concat(filters);
+          }
+        });
       }
     }
     this.filters = filters;

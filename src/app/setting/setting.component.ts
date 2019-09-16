@@ -108,7 +108,29 @@ export class SettingComponent implements OnInit {
     this.openFilterDialog(settingsObj, filter);
   }
 
-   saveSettings() : void {
+  onNewCouchUrl(target: any): void {
+    console.log("onNew", target);
+    var url = target.value;
+    this.metadata.couchUrl = url;
+    this.onCouchUrlChanged();
+    target.value = '';
+  }
+
+  onCouchUrlChanged(): void {
+    var url = this.metadata.couchUrl;
+    console.log("Couch URL changed " + url);
+    var urls = this.metadata.recentCouchUrls;
+    if (! urls) {
+      urls = [];
+      this.metadata.recentCouchUrls = urls;
+    }
+    if (urls.indexOf(url) == -1) {
+      urls.push(url);
+    }
+    this.saveSettings();
+    this.loadMetaData();
+  }
+  saveSettings() : void {
      console.log(this.metadata);
     this.appService.store(this.metadata);
     this.showMessage("Settings Stored.");
@@ -160,6 +182,11 @@ export class SettingComponent implements OnInit {
 
   public onUnderscoreDbConfChanged(): void {
     console.log("include", this.metadata.includeUnderscoreDbs);
+    this.storeSettings(this.metadata);
+  }
+
+  public onAssociatedDbsChange(selectedDb: any) {
+    console.log("onAssociatedDbsChange: ", selectedDb);
     this.storeSettings(this.metadata);
   }
  }

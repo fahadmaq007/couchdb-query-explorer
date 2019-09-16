@@ -146,12 +146,23 @@ export class QueryComponent implements OnInit {
       duration: 2000,
     });
   }
+  private removeAlreadyPresentFilter(filters, filter): void {
+    if (filters.length > 0) {
+      for (let index = 0; index < filters.length; index++) {
+        const each = filters[index];
+        if (each.field == filter.field) {
+          filters.splice(index, 1);
+          break;
+        }
+      }
+    }
+  }
   onFilterChanged(filter): void {
     delete filter.$$edit;
-    console.log("onFilterChanged", filter);
     var index = this.selectedFilters.indexOf(filter);
     if (filter.selected) {
       if (index == -1) {
+        this.removeAlreadyPresentFilter(this.selectedFilters, filter);
         this.selectedFilters.push(filter);
       }
     } else {
@@ -160,6 +171,7 @@ export class QueryComponent implements OnInit {
       }
     }
     delete filter.selected;
+    console.log("onFilterChanged", filter);
     this.executeQuery();
   }
 

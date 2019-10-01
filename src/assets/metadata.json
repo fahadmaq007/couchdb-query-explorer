@@ -9,5 +9,6 @@
         "$regex": "contains",
         "$gt": "greater than",
         "$lt": "less than"
-    }
+    },
+    "dbs": {}
 }

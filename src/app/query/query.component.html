@@ -1,13 +1,29 @@
 <div class="margin">
 
   <div class="row">
-    <div class="col col-md-6 col-sm-12 col-12">
+    <div class="col col-md-3 col-sm-6 col-12">
+        <mat-form-field class="full-width">
+          <mat-label>CouchDB URL: </mat-label>
+          <mat-select [(ngModel)]="metadata.couchUrl" (selectionChange)="onCouchUrlChanged()">
+            <mat-option *ngFor="let url of metadata.recentCouchUrls" [value]="url">
+              <span>{{url}}</span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    <div class="col col-md-3 col-sm-6 col-12">
       <mat-form-field class="full-width">
-        <mat-label>Database: </mat-label>
+        <mat-label>Database: 
+          <span *ngIf="metadata.selectedDb && dbInfo">
+              <span class="badge ml-1">{{dbInfo.doc_count | number}} docs</span> 
+    
+              <span class="badge ml-1">{{dbInfo.data_size / (1024 * 1024) | number : '1.2-2'}} MB</span> 
+          </span>
+        </mat-label>
         <mat-select [(ngModel)]="metadata.selectedDb" (selectionChange)="onDbChange()" color="accent">
           <mat-option *ngFor="let db of dbs" [value]="db">
-            <span *ngIf="metadata.dbs[db] && metadata.dbs[db].name">{{metadata.dbs[db].name}}</span>
-            <span *ngIf="!metadata.dbs[db] || !metadata.dbs[db].name">{{db}}</span>
+            <span *ngIf="metadata.dbs && metadata.dbs[db] && metadata.dbs[db].name">{{metadata.dbs[db].name}}</span>
+            <span *ngIf="!(metadata.dbs && metadata.dbs[db] && metadata.dbs[db].name)">{{db}}</span>
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -47,36 +63,48 @@
       </span>
 
       <button mat-raised-button color="primary" class="component-group ml-1" (click)="clearFilterSelection()" *ngIf="selectedFilters.length">
-        Clear Selection
+        Clear 
       </button>
 
       <button mat-raised-button color="primary" class="component-group ml-2" (click)="copySelectors()" *ngIf="selectedFilters.length"
         matTooltip="Copy the query as JSON text">
-        Copy Query
+        Copy
       </button>
+
+      <!-- <button mat-raised-button color="primary" class="component-group ml-2" (click)="showCount()" *ngIf="selectedFilters.length"
+        matTooltip="Shows the total number of documents">
+        Count
+      </button> -->
     </div>
   </div>
-  <div class="row" *ngIf="dataSource.data.length">
+  <div class="row">
     <div class="col col-md-6 col-sm-6 col-12">
+      <mat-form-field class="full-width">
+        <mat-label>Count by startkey:</mat-label>
+        <input matInput (keyup.enter)="showCount($event.target.value)" placeholder="Key in startkey & hit Enter">
+      </mat-form-field>
+    </div>
+    <div *ngIf="dataSource.data.length" class="col col-md-6 col-sm-6 col-12">
       <mat-form-field class="full-width">
         <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
       </mat-form-field>
     </div>
   </div>
 
-  <div class="row" [ngClass]="{'mt-3': ! dataSource.data.length}">
+  <!-- [ngClass]="{'mt-3': ! dataSource.data.length}" -->
+  <div class="row mt-2">  
     <div class="col col-md-12 col-sm-12 col-12">
       <mat-table #table [dataSource]="dataSource" class="mat-elevation-z8">
         <ng-container matColumnDef="{{column}}" *ngFor="let column of displayedColumns">
-          <mat-header-cell *matHeaderCellDef [ngClass]="column">
+          <mat-header-cell *matHeaderCellDef="let row" [ngClass]="column">
             <mat-checkbox *ngIf="column == 'select'" (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
-              [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+              [indeterminate]="selection.hasValue() && isAllSelected()">
             </mat-checkbox>
             <span *ngIf="column != 'select'"><b>{{ column }}</b></span>
           </mat-header-cell>
-          <mat-cell *matCellDef="let element" [ngClass]="column">
-            <mat-checkbox *ngIf="column == 'select'" (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
-              [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+          <mat-cell *matCellDef="let element; let row" [ngClass]="column">
+            <mat-checkbox *ngIf="column == 'select'" (click)="$event.stopPropagation()" (change)="$event ? select(row) : null"
+              [checked]="selection.isSelected(row)">
             </mat-checkbox>
             <span *ngIf="column == '_id'" matTooltip="Open Document {{appService.stringify(element)}}"
               matTooltipPosition='after' ngxClipboard [cbContent]="element[column]" (click)="showMessage('Copied _id')">
@@ -87,11 +115,13 @@
             <a class="copy" *ngIf="column != '_id' && column != 'select' && element[column]" ngxClipboard [cbContent]="element[column]"
               matTooltip="Copy text" (click)="showMessage('Copied Text')">{{element[column]}} </a>
           </mat-cell>
-          <mat-cell *matHeaderCellDef> <span><b>Showing {{dataSource.data.length}} documents</b></span> </mat-cell>
+          <mat-cell *matHeaderCellDef> <span><b>Showing {{dataSource.data.length}} documents </b></span> </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns;"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></mat-row>
+        <mat-header-row *matHeaderRowDef="displayedColumns;sticky: true;"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;" 
+          [ngClass]="{highlighted: selectedRowIndex == row.id}" (mouseover)="highlight(row)">
+        </mat-row>
       </mat-table>
 
       <mat-card *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center; border-radius: 0px">
@@ -105,8 +135,23 @@
   <div class="row">
     <div class="col col-md-6 col-sm-6 col-12 mt-3">
       <div class="info-text">
-        <span *ngIf="dataSource.data.length">Showing {{dataSource.data.length}} documents</span>
-        <span *ngIf="!dataSource.data">No documents found</span>
+        <span *ngIf="dataSource.data.length">
+          Showing page {{page.pageIndex + 1}} of {{dataSource.data.length}} documents
+          
+          <button matTooltip="First Page" mat-icon-button aria-label="First Page" (click)="firstPage()" [disabled]="page.pageIndex == 0">
+            <i class="fas fa-fast-backward"></i>
+          </button>
+
+          <button matTooltip="Previous Page" mat-icon-button aria-label="Previous Page" (click)="prevPage()" [disabled]="page.pageIndex == 0">
+              <i class="fas fa-chevron-circle-left "></i>
+          </button>
+
+          <button matTooltip="Next Page" mat-icon-button aria-label="Next Page" (click)="nextPage()" [disabled]="pageLength < page.pageSize">
+              <i class="fas fa-chevron-circle-right "></i>
+          </button>
+          
+        </span>
+        <span *ngIf="selectedFilters.length && !dataSource.data.length">No documents found</span>
       </div>
     </div>
     <div class="col col-md-6 col-sm-6 col-12 flex-end">
@@ -127,7 +172,7 @@
 
       <a *ngIf="dataSource.data && dataSource.data.length" mat-raised-button color="primary" class="ml-3" title="Download JSON"
         [href]="downloadJsonHref" download="download.json" (click)="generateDownloadJsonUri()" matTooltip="Download selected rows (Considers all if none selected)">Download</a>
-      <!-- <mat-paginator #paginator [length]="pageLength" [pageSizeOptions]="[10, 20, 50]" (page)="onPageEvent($event)" ></mat-paginator> -->
+      
     </div>
   </div>
 

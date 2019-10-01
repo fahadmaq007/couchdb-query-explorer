@@ -8,6 +8,8 @@ $header-text-color: #cbbde2;
 $accent: #ffe484;
 $info-text: rgba(0,0,0,.54);
 $light-gray: rgba(0,0,0,.03);
+$gray: rgba(0,0,0,.1);
+$red: rgb(185, 14, 14);
 
 // IMPORTS
 // - LOADING
@@ -87,7 +89,7 @@ snack-bar-container {
 }
 .mat-table {
   overflow: auto;
-  max-height: 400px;
+  max-height: 390px;
 }
 .mat-column-select {
   overflow: initial;
@@ -220,4 +222,21 @@ flex: 0 0 90px !important;
 }
 .copy {
   text-overflow: ellipsis;
+}
+.error {
+  background-color: $red !important;
+  color: white;
+}
+.badge {
+  background-color: $gray;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.selected {
+  background-color: red;
+}
+ 
+.mat-row.highlighted {
+  background: lightblue;
 }

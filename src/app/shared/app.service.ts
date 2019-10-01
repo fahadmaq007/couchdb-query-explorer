@@ -53,6 +53,19 @@ export class AppService {
         return this.metadata;
     }
 
+
+    getDbUrl(db: string): string {
+        if (! db) {
+            db = this.getSelectedDb();
+        }
+        return this.getCouchUrl() + '/' + db;
+    }
+
+    private getAllDocsUrl() : string {
+        var url = this.getDbUrl(this.getSelectedDb()) + "/_all_docs";
+        return url;
+    }
+
     public getCouchUrl(): string {
         return this.getMetaData().couchUrl;
     }
@@ -106,11 +119,12 @@ export class AppService {
         return this.getCouchUrl() + '/_utils/#database/' + this.getSelectedDb();
     }
 
-    getDbUrl(): string {
-        return this.getCouchUrl() + '/' + this.getSelectedDb();
+    getDbInfo(db: string): any {
+        const url = this.getDbUrl(db);
+        return this.httpClient.get<DbInfo[]>(url);
     }
 
-    prepareQueryObject(filters: any[], page: any): any {
+    prepareQueryObject(filters: any[], fields: string[], page: any): any {
         var qObject = {
             "selector": {}
         }
@@ -125,6 +139,9 @@ export class AppService {
                 qObject["skip"] = skip;
             }
         }
+        if (fields && fields.length) {
+            qObject["fields"] = fields;
+        }
         filters.forEach(each => {
             let filter = this.clone(each); // clone
             if (!filter.value) {
@@ -138,9 +155,9 @@ export class AppService {
         });
         return qObject;
     }
-    executeQuery(filters: any[], page: any): Observable<any[]> {
-        var url = this.getDbUrl() + '/_find';
-        var qObject = this.prepareQueryObject(filters, page);
+    executeQuery(filters: any[], fields: string[], page: any): Observable<any[]> {
+        var url = this.getDbUrl(undefined) + '/_find';
+        var qObject = this.prepareQueryObject(filters, fields, page);
         console.log("qObject: " + JSON.stringify(qObject));
 
         return this.httpClient.post<any[]>(url, qObject)
@@ -182,5 +199,32 @@ export class AppService {
         }
         var json = "{" + text.substring(0, text.lastIndexOf(",")) + "}"; 
         return JSON.stringify(json, undefined, 3);
+    }
+
+    showRunTime(start, msg) {
+        var end = new Date().getTime();
+        console.info("time taken " + (end - start) + " ms. " + msg );
+    }
+
+    
+    public allDocs(qObject: any) : any {
+        var url = this.getAllDocsUrl();
+        var queryParams = this.prepareQueryParams(qObject);
+        // if (queryParams && queryParams.length) {
+        //     url += queryParams;
+        // }
+        console.log("allDocs query... " + url);
+        return this.httpClient.get<any>(url, {
+            params: qObject});
+    }
+
+    private prepareQueryParams(queryParams : any): string {
+        var queryString = "";
+        if (queryParams) {
+            queryString = Object.keys(queryParams).reduce(function (previous, key, index){
+                return previous + ((index == 0) ? "?" : "&") + key + "=\"" + queryParams[key]+ "\"";
+            }, '');
+        }
+        return queryString;
     }
 }

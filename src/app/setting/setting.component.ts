@@ -52,7 +52,7 @@ export class SettingComponent implements OnInit {
       var dbMeta = this.metadata.dbs[db + ""];
       var changed = false;
       if (! dbMeta) {
-        dbMeta = {};
+        dbMeta = {associatedDbs: [] };
         this.metadata.dbs[db + ""] = dbMeta;
         changed = true;
       }

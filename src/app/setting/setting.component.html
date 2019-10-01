@@ -174,7 +174,7 @@
 
               <mat-divider></mat-divider>
 
-              <section class="section">
+              <section class="section" *ngIf="metadata.dbs[metadata.selectedDb]">
                   <h4>Associate Filters</h4><h6>In this section you can associate filters defined for other databases</h6>
                   <mat-form-field class="full-width">
                     <mat-label>Databases: </mat-label>

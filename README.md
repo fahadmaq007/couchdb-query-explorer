@@ -23,10 +23,10 @@ Step 1: ./docker-run.sh (runs the image in your local machine on port 8855 - mak
 
 Step 2: Launch http://localhost:8855/couchdb-query-explorer
 
-Note: The docker images have been published to docker hub at https://cloud.docker.com/repository/docker/maqboolahmed/couchdb-query-explorer, refer the link to find more about the tags & versions.
+Note: The docker images have been published to <a href="https://cloud.docker.com/repository/docker/maqboolahmed/couchdb-query-explorer" target="_blank">docker hub</a>, refer the link to find more about the tags & versions.
 
 ******************
 
 <b>How to use the app?</b>
 
-It's relatively a simple & an intuitive tool to query the CouchDB. The detailed description is here: https://medium.com/@maqbool.ahmed.mca/https-medium-com-maqbool-ahmed-mca-couchdb-query-explorer-84887827e11
+It's relatively a simple & an intuitive tool to query the CouchDB. The detailed description is <a href="https://medium.com/@maqbool.ahmed.mca/https-medium-com-maqbool-ahmed-mca-couchdb-query-explorer-84887827e11" target="_blank">here</a>.

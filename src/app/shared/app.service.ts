@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { AppConfig } from '../config/app.config';
 import { Observable } from 'rxjs/Observable';
 import { catchError, map } from 'rxjs/operators';
@@ -124,9 +124,9 @@ export class AppService {
         return this.httpClient.get<DbInfo[]>(url);
     }
 
-    prepareQueryObject(filters: any[], fields: string[], page: any): any {
-        var qObject = {
-            "selector": {}
+    preparePageObject(qObject: any, page: any): any {
+        if (! qObject) {
+            qObject = {};
         }
         if (page) {
             var pageSize = page.pageSize;
@@ -138,6 +138,15 @@ export class AppService {
                 page.length += skip;
                 qObject["skip"] = skip;
             }
+        }
+        return qObject;
+    }
+    prepareQueryObject(filters: any[], fields: string[], page: any): any {
+        var qObject = {
+            "selector": {}
+        }
+        if (page) {
+            this.preparePageObject(qObject, page);
         }
         if (fields && fields.length) {
             qObject["fields"] = fields;
@@ -207,24 +216,32 @@ export class AppService {
     }
 
     
-    public allDocs(qObject: any) : any {
+    public allDocs(params: HttpParams) : any {
         var url = this.getAllDocsUrl();
-        var queryParams = this.prepareQueryParams(qObject);
-        // if (queryParams && queryParams.length) {
-        //     url += queryParams;
-        // }
         console.log("allDocs query... " + url);
         return this.httpClient.get<any>(url, {
-            params: qObject});
+            params: params});
     }
 
+    public getDocuments(result: any[]): any[] {
+        var docs = [];
+        for (var i = 0; i < result.length; i++) {
+            var doc = result[i].doc;
+            if (doc) {
+                docs.push(doc);
+            }
+        }
+        return docs;
+    }
     private prepareQueryParams(queryParams : any): string {
         var queryString = "";
         if (queryParams) {
+            console.log(Object.keys(queryParams));
             queryString = Object.keys(queryParams).reduce(function (previous, key, index){
                 return previous + ((index == 0) ? "?" : "&") + key + "=\"" + queryParams[key]+ "\"";
             }, '');
         }
+        console.log(queryString);
         return queryString;
     }
 }

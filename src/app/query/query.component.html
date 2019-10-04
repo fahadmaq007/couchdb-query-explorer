@@ -28,16 +28,7 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="col col-md-6 col-sm-12 col-12">
-      <span *ngIf="metadata.selectedDb">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Key in document _id & hit Enter" [(ngModel)]="_idFilter.value" (keyup.enter)="showDocumentById()">
-          <button mat-button *ngIf="_idFilter.value" matSuffix mat-icon-button aria-label="Clear" (click)="_idFilter.value=undefined">
-            <i class="fas fa-times"></i>
-          </button>
-        </mat-form-field>
-      </span>
-    </div>
+    
   </div>
 
   <div class="row">
@@ -54,41 +45,63 @@
 
           <span class="filter-wrapper" *ngIf="filter.$$edit">
             <input placeholder="Value" matTooltip="Key in & hit Enter" [(ngModel)]="filter.value" (keyup.enter)="filter.selected = true; onFilterChanged(filter)">
-            <!-- <button mat-button *ngIf="filter.value" matSuffix mat-icon-button aria-label="Clear" (click)="filter.value=undefined">
-                <i class="fas fa-times"></i>
-              </button> -->
           </span>
 
         </span>
       </span>
 
-      <button mat-raised-button color="primary" class="component-group ml-1" (click)="clearFilterSelection()" *ngIf="selectedFilters.length">
+      <button mat-raised-button color="primary" class="component-group ml-1" (click)="clearFilters()">
         Clear 
       </button>
 
-      <button mat-raised-button color="primary" class="component-group ml-2" (click)="copySelectors()" *ngIf="selectedFilters.length"
+      <button mat-raised-button color="primary" class="component-group ml-2" (click)="copySelectors()"
         matTooltip="Copy the query as JSON text">
         Copy
       </button>
-
-      <!-- <button mat-raised-button color="primary" class="component-group ml-2" (click)="showCount()" *ngIf="selectedFilters.length"
-        matTooltip="Shows the total number of documents">
-        Count
-      </button> -->
     </div>
   </div>
-  <div class="row">
-    <div class="col col-md-6 col-sm-6 col-12">
-      <mat-form-field class="full-width">
-        <mat-label>Count by startkey:</mat-label>
-        <input matInput (keyup.enter)="showCount($event.target.value)" placeholder="Key in startkey & hit Enter">
-      </mat-form-field>
+  <div class="row mt-1">
+    <div class="col col-md-3 col-sm-6 col-12">
+        <mat-form-field class="full-width">
+          <mat-label>Filter Table:</mat-label>
+          <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Key in text">
+        </mat-form-field>
     </div>
-    <div *ngIf="dataSource.data.length" class="col col-md-6 col-sm-6 col-12">
+
+    <div class="col col-md-3 col-sm-6 col-12">
+        <span *ngIf="metadata.selectedDb">
+          <mat-form-field class="full-width">
+            <mat-label>Search by _id:</mat-label>
+            <input matInput placeholder="Key in document _id & hit Enter" [(ngModel)]="_idFilter.value" (keyup.enter)="showDocumentById();_idFilter.value=undefined">
+            <button mat-button *ngIf="_idFilter.value" matSuffix mat-icon-button aria-label="Clear" matTooltip="Clear" 
+            (click)="_idFilter.value=undefined;clearData()">
+              <i class="fas fa-times"></i>
+            </button>
+          </mat-form-field>
+        </span>
+      </div>
+
+    <div class="col col-md-3 col-sm-6 col-12">
       <mat-form-field class="full-width">
-        <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+        <mat-label>Search by startkey:</mat-label>
+        <input matInput [(ngModel)]="startkey" (keyup.enter)="onStartkeyChanged();" placeholder="Key in startkey & hit Enter">
+        <button mat-button *ngIf="startkey" matSuffix mat-icon-button aria-label="Count" 
+        (click)="showCount(startkey)" matTooltip="Count by startkey">
+          <i class="fas fa-calculator"></i>
+        </button>
+        <button mat-button *ngIf="startkey" matSuffix mat-icon-button aria-label="Clear" matTooltip="Clear"
+        (click)="clearStartkey()">
+          <i class="fas fa-times"></i>
+        </button>
+        
       </mat-form-field>
+      
     </div>
+    
+    <div class="col col-md-3 col-sm-6 col-12">
+      
+    </div>
+    
   </div>
 
   <!-- [ngClass]="{'mt-3': ! dataSource.data.length}" -->
@@ -113,7 +126,7 @@
               </a>
             </span>
             <a class="copy" *ngIf="column != '_id' && column != 'select' && element[column]" ngxClipboard [cbContent]="element[column]"
-              matTooltip="Copy text" (click)="showMessage('Copied Text')">{{element[column]}} </a>
+              matTooltip="Copy {{column}}" (click)="showMessage('Copied')">{{element[column]}} </a>
           </mat-cell>
           <mat-cell *matHeaderCellDef> <span><b>Showing {{dataSource.data.length}} documents </b></span> </mat-cell>
         </ng-container>
@@ -135,7 +148,7 @@
   <div class="row">
     <div class="col col-md-6 col-sm-6 col-12 mt-3">
       <div class="info-text">
-        <span *ngIf="dataSource.data.length">
+        <span>
           Showing page {{page.pageIndex + 1}} of {{dataSource.data.length}} documents
           
           <button matTooltip="First Page" mat-icon-button aria-label="First Page" (click)="firstPage()" [disabled]="page.pageIndex == 0">
@@ -146,7 +159,7 @@
               <i class="fas fa-chevron-circle-left "></i>
           </button>
 
-          <button matTooltip="Next Page" mat-icon-button aria-label="Next Page" (click)="nextPage()" [disabled]="pageLength < page.pageSize">
+          <button matTooltip="Next Page" mat-icon-button aria-label="Next Page" (click)="nextPage()" [disabled]="dataSource.data.length < page.pageSize">
               <i class="fas fa-chevron-circle-right "></i>
           </button>
           

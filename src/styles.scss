@@ -35,6 +35,8 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
 }
 body {
   overflow-y: auto;
+
+  font-size: 0.9em;
 }
 .fontsize18 {
   font-size: 18px;
@@ -238,5 +240,8 @@ flex: 0 0 90px !important;
 }
  
 .mat-row.highlighted {
-  background: lightblue;
+  background: #f7edd0;
+}
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  margin-bottom: 0rem;
 }

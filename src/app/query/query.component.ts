@@ -7,6 +7,7 @@ import { ClipboardService } from 'ngx-clipboard'
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-query',
@@ -24,7 +25,6 @@ export class QueryComponent implements OnInit {
   dataSource = new MatTableDataSource<any>();
   // MatPaginator Output
   page: any = { pageIndex: 0, pageSize: 50, length: 0 };
-  pageLength: number;
   isLoading: boolean = false;
   selection = new SelectionModel<any>(true, []);
   displayedColumns: string[] = [];
@@ -32,7 +32,9 @@ export class QueryComponent implements OnInit {
   downloadJsonHref: SafeUrl;
   dbInfo: any;
   selectedRowIndex: number;
- 
+  queryType: string = "byFilter";
+  startkey: string = "";
+
   highlight(row) {
     this.selectedRowIndex = row.id;
   }
@@ -77,6 +79,8 @@ export class QueryComponent implements OnInit {
 
   select(row): void {
     this.selection.select(row);
+    this.clipboardService.copyFromContent(row._id);
+    this.showMessage("Copied _id");
   }
 
   loadAllDbs(): void {
@@ -125,7 +129,7 @@ export class QueryComponent implements OnInit {
     console.log('displayedColumns: ' + this.metadata.selectedDb, this.displayedColumns);
     
     this.showMessage("Database changed to " + db);
-    this.clearFilterSelection();
+    this.clearFilters();
   }
 
   private getDbFilters(db: string): any[] {
@@ -168,6 +172,36 @@ export class QueryComponent implements OnInit {
   }
 
   executeQuery(): void {
+    if (this.queryType == "byFilter") {
+      this.executeQueryByFilters();
+    } else if ( this.queryType == "byStartkey" ) {
+      this.executeQueryByStartkey(this.startkey);
+    }
+  }
+
+  executeQueryByStartkey(key: string): void {
+    var start = new Date().getTime();
+    let params = new HttpParams();
+    params = params.append('startkey', JSON.stringify(key));
+    params = params.append('endkey', JSON.stringify(key + "\ufff0"));
+    params = params.append('inclusive_end', "true");
+    params = params.append('include_docs', "true");
+    var pageObject = this.appService.preparePageObject({}, this.page);
+    params = params.append('limit', pageObject["limit"]);
+    var skip = pageObject["skip"];
+    if (skip) {
+      params = params.append('skip', skip);
+    }
+    this.appService.allDocs(params).subscribe(data => {
+      if (data && data["rows"]) {
+        var docs = this.appService.getDocuments(data["rows"]);
+        this.dataSource.data = docs;
+        this.appService.showRunTime(start, "");
+      }
+    });
+  } 
+
+  executeQueryByFilters(): void {
     if (!this.selectedFilters.length) {
       this.dataSource.data = [];
       return;
@@ -178,7 +212,6 @@ export class QueryComponent implements OnInit {
     this.appService.executeQuery(this.selectedFilters, undefined, page).subscribe(data => {
       var docs = data["docs"];
       this.dataSource.data = docs;
-      this.pageLength = docs.length < page.pageSize ? docs.length : page["length"];  
       this.isLoading = false;
     });
   }
@@ -206,7 +239,18 @@ export class QueryComponent implements OnInit {
       }
     }
   }
+
+  onStartkeyChanged(): void {
+    this.queryType = "byStartkey";
+    this.clearFilters();
+    this.resetPage();
+    
+    console.log("onStartkeyChanged", this.startkey);
+    this.executeQuery();
+  }
+
   onFilterChanged(filter): void {
+    this.queryType = "byFilter";
     delete filter.$$edit;
     var index = this.selectedFilters.indexOf(filter);
     if (filter.selected) {
@@ -228,22 +272,31 @@ export class QueryComponent implements OnInit {
   resetPage(): void {
     this.page.pageIndex = 0;
   }
-  clearFilterSelection(): void {
-    this.selectedFilters = [];
+
+  clearData(): void {
     this.dataSource.data = [];
   }
 
-  copyDocumentId(): void {
+  clearStartkey(): void {
+    this.startkey = "";
+    this.clearData();
+  }
+
+  clearFilters(): void {
     this.selectedFilters = [];
-    this.selectedFilters.push(this._idFilter);
-    this.executeQuery();
+    this.clearData();
   }
 
   showDocumentById(): void {
-    this.selectedFilters = [];
-    this.selectedFilters.push(this._idFilter);
-    this.executeQuery();
-    this.selectedFilters = [];
+    var keys = [ this._idFilter.value ];
+    let params = new HttpParams();
+    params = params.append('keys', JSON.stringify(keys));
+    params = params.append('include_docs', JSON.stringify(true));
+    
+    this.appService.allDocs(params).subscribe(data => {
+      var docs = this.appService.getDocuments(data["rows"]);
+      this.dataSource.data = docs;
+    });
   }
 
   copySelectors(): void {
@@ -310,12 +363,6 @@ export class QueryComponent implements OnInit {
     this.showMessage("Copied " + numSelected + " Document(s)");
   }
 
-  onpage(event): void {
-    console.log(event);
-    this.page = event;
-    this.executeQuery();
-  }
-
   generateDownloadJsonUri() {
     var text = this.getCopiedData();
     var uri = this.sanitizer.bypassSecurityTrustUrl("data:text/json;charset=UTF-8," + encodeURIComponent(text));
@@ -354,12 +401,12 @@ export class QueryComponent implements OnInit {
   }
 
   showCount(key: string): void {
-    var pageSize = this.dbInfo ? this.dbInfo.doc_count : 1000;
-    var page = { pageIndex : 0, pageSize: pageSize };
-    var fields = ["_id"];
     var start = new Date().getTime();
-    var qObject = {startkey: "\"" + key + "\"", endkey: "\"" + key + "\ufff0\"", limit: pageSize, inclusive_end: true };
-    this.appService.allDocs(qObject).subscribe(data => {
+    let params = new HttpParams();
+    params = params.append('startkey', JSON.stringify(key));
+    params = params.append('endkey', JSON.stringify(key + "\ufff0"));
+    params = params.append('inclusive_end', "true");
+    this.appService.allDocs(params).subscribe(data => {
       if (data && data["rows"]) {
         // this.dataSource.data = data["rows"];
         this.showMessage("There are " + data["rows"].length + " documents");
